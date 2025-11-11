@@ -1,0 +1,5 @@
+Please add the following images to this folder:
+1. ubl-header (1).png - Bank header image
+2. footer (1).png - Bank footer image
+
+These images should be from your bank statement template.
