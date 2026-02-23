@@ -20,7 +20,7 @@ const generateHeaderSection = (
   isFirstPage: boolean
 ) => {
   const accountInfoDiv = `
-    <div style="display: flex; justify-content: space-between; padding-right: 6pt; align-items: flex-start;">
+    <div style="display: flex; justify-content: space-between; padding-right: 6pt; align-items: flex-start; background-color: white;">
       <div>
         <h2 style="padding-left: 3pt; text-indent: 0pt; line-height: 125%; text-align: left;">
           ${accountInfo.accountTitle}

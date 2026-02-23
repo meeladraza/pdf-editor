@@ -37,7 +37,7 @@ export const PreviewModal = ({ isOpen, onClose, htmlContent, onDownloadPDF }: Pr
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+        <div className="flex-1 overflow-auto p-6">
           <div className="bg-white rounded-lg shadow-sm">
             <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
           </div>

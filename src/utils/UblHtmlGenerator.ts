@@ -1,7 +1,7 @@
 import { TransactionRow, UBLAccountInfo } from "../types";
 import { formatNumber } from "./excelParser";
 
-const FIRST_PAGE_MAX_HEIGHT = 680;
+const FIRST_PAGE_MAX_HEIGHT = 640;
 const OTHER_PAGE_MAX_HEIGHT = 620;
 const ROW_HEIGHT_BASE = 13;
 const ROW_HEIGHT_LAST_LINE = 12;
@@ -17,7 +17,7 @@ const calculateTransactionHeight = (transaction: TransactionRow): number => {
 
 const generateHeaderSection = (
   accountInfo: UBLAccountInfo,
-  isFirstPage: boolean
+  isFirstPage: boolean,
 ) => {
   const accountInfoDiv = `
     <div style="display: flex; justify-content: space-between; padding-right: 6pt; align-items: flex-start;">
@@ -69,6 +69,7 @@ const generateHeaderSection = (
   `;
 
   return `
+  <img src="/ubl-header (1).png" alt="UB Header" style="width: 962px; max-width: 100%; height: auto; display: block; margin: 0 auto 6px;" />
     <h2 style="margin-top: -15px; padding-left: 3pt; text-indent: 43pt; line-height: 125%; text-align: left;">
       ${accountInfo.branchCode}
     </h2>
@@ -124,15 +125,15 @@ const generateTransactionRow = (transaction: TransactionRow) => {
                   : ""
               }>
           <p class="${styleClass}" style="padding-left: 1pt; text-indent: 0pt; line-height: 11pt; text-align: left;">${
-                transaction.date
-              }</p>
+            transaction.date
+          }</p>
         </td>`
             : ""
         }
         <td style="width: 261pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;">
           <p class="${styleClass}" style="padding-left: 2pt; text-indent: 0pt; line-height: 11pt; text-align: left;">${
-      particularsLines[i]
-    }</p>
+            particularsLines[i]
+          }</p>
         </td>
         ${
           isFirstLine
@@ -142,8 +143,8 @@ const generateTransactionRow = (transaction: TransactionRow) => {
                   : ""
               }>
           <p class="${styleClass}" style="text-indent: 0pt; line-height: 11pt; text-align: right;">${
-                transaction.instNo
-              }</p>
+            transaction.instNo
+          }</p>
         </td>`
             : ""
         }
@@ -155,10 +156,10 @@ const generateTransactionRow = (transaction: TransactionRow) => {
                   : ""
               }>
           <p class="${styleClass}" style="${
-                transaction.debit ? "padding-left: 35pt;" : ""
-              } text-indent: 0pt; line-height: 11pt; text-align: left;">${
-                transaction.debit ? formatNumber(transaction.debit) : ""
-              }</p>
+            transaction.debit ? "padding-left: 35pt;" : ""
+          } text-indent: 0pt; line-height: 11pt; text-align: left;">${
+            transaction.debit ? formatNumber(transaction.debit) : ""
+          }</p>
         </td>`
             : ""
         }
@@ -170,8 +171,8 @@ const generateTransactionRow = (transaction: TransactionRow) => {
                   : ""
               }>
           <p class="${styleClass}" style="text-indent: 0pt; line-height: 11pt; text-align: right;">${
-                transaction.credit ? formatNumber(transaction.credit) : ""
-              }</p>
+            transaction.credit ? formatNumber(transaction.credit) : ""
+          }</p>
         </td>`
             : ""
         }
@@ -183,8 +184,8 @@ const generateTransactionRow = (transaction: TransactionRow) => {
                   : ""
               }>
           <p class="${styleClass}" style="padding-left: 45pt; text-indent: 0pt; line-height: 11pt; text-align: left;">${
-                transaction.balance
-              }</p>
+            transaction.balance
+          }</p>
         </td>`
             : ""
         }
@@ -227,13 +228,13 @@ const generateTotalsTable = (transactions: TransactionRow[]) => {
         </td>
         <td style="width: 93pt; border-top-style: solid; border-top-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt;">
           <p class="s5" style="padding-top: 3pt; padding-right: 2pt; text-indent: 0pt; text-align: right;">${formatNumber(
-            totalDebit
+            totalDebit,
           )}</p>
           <p class="s5" style="padding-top: 6pt; padding-right: 1pt; text-indent: 0pt; text-align: right;">${transactionCount}</p>
         </td>
         <td style="width: 95pt; border-top-style: solid; border-top-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt;">
           <p class="s5" style="padding-top: 3pt; text-indent: 0pt; text-align: right;">${formatNumber(
-            totalCredit
+            totalCredit,
           )}</p>
         </td>
         <td style="width: 109pt; border-top-style: solid; border-top-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;">
@@ -246,22 +247,21 @@ const generateTotalsTable = (transactions: TransactionRow[]) => {
 
 const generateFooter = (pageNum: number, totalPages: number) => {
   return `
-    <div class="footer">
-      <div>
-        <p style="width: 70%; padding-left: 4pt; text-indent: 0pt; line-height: 87%; text-align: left; font-size: 9pt;">
-          Note: The items and balance shown on this statement should be verified and the branch manager notified within 2 weeks of any discrepancies, otherwise it will be assumed as correct.
-        </p>
-        <h2 style="text-indent: 0pt; text-align: right; font-size: 10pt; margin-top: 6pt;">
-          Page # ${pageNum} / ${totalPages}
-        </h2>
-      </div>
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; width: 100%; z-index: 1;">
+      <p style="position: absolute; bottom: 80pt; left: 4pt; width: 80%; text-indent: 0pt; line-height: 87%; text-align: left; font-family: Arial, sans-serif; font-size: 9pt;">
+        Note: The items and balance shown on this statement should be verified and the branch manager notified within 2 weeks of any discrepancies, otherwise it will be assumed as correct.
+      </p>
+      <h2 style="position: absolute; right: 20pt; bottom: 110pt; text-indent: 0pt; text-align: right; font-size: 10pt;">
+        Page # ${pageNum} / ${totalPages}
+      </h2>
+      <img src="/footer (1).png" alt="UB Footer" style="width: 100%; height: auto; display: block; margin: 0;" />
     </div>
   `;
 };
 
 export const generateUBLHTML = (
   transactions: TransactionRow[],
-  accountInfo: UBLAccountInfo
+  accountInfo: UBLAccountInfo,
 ): string => {
   const pages: TransactionRow[][] = [];
   let currentPageTransactions: TransactionRow[] = [];
@@ -313,41 +313,37 @@ export const generateUBLHTML = (
     const footer = generateFooter(pageNum, totalPages);
 
     const pageHtml = `
-      <div class="page" style="position: relative; width: 210mm; margin: 0 auto; page-break-after: always; background-color: white;">
-        <div class="page-content" style="position: relative; width: calc(210mm - 24mm); margin: 12mm auto; z-index: 2; min-height: 257mm;">
+      <div style="position: relative; width: 962px; height: 1122px; margin: auto; page-break-after: always; overflow: hidden;">
+        <div style="position: static; width: 100%; z-index: 2; padding-bottom: 100px;">
           ${headerSection}
           <div style="padding-left: 3pt; padding-right: 6pt">
-            <table style="border-collapse: collapse; width: 100%;" cellspacing="0">
+            <table style="border-collapse: collapse" cellspacing="0">
               ${tableHeader}
               ${tableRows}
             </table>
             ${totalsTable}
           </div>
         </div>
-        ${footer}
+        
       </div>
     `;
 
     htmlPages.push(pageHtml);
   });
 
-    const styles = `
-    @page { size: A4; margin: 12mm; }
-    * { margin: 0; padding: 0; text-indent: 0; box-sizing: border-box; }
-    html, body { height: 100%; background-color: #f2f2f2; }
-    .page { box-shadow: none; }
-    .page, .page-content { font-family: "Times New Roman", serif; color: #000; }
-    h2 { font-weight: bold; font-size: 10pt; margin: 0 0 4px 0; }
-    .s1 { font-weight: normal; font-size: 10pt; }
-    h1 { font-weight: bold; font-size: 11pt; }
-    .s2 { font-weight: normal; font-size: 20pt; }
-    .s3 { font-weight: bold; font-size: 11pt; }
-    .s4 { font-weight: normal; font-size: 11pt; }
-    .s5 { font-weight: normal; font-size: 10pt; }
-    p { font-family: "Times New Roman", serif; font-size: 9pt; margin: 0; }
+  const styles = `
+    @page { margin: 0; size: A4; }
+    body { margin: 0; padding: 0; }
+    * { margin: 0; padding: 0; text-indent: 0; }
+    h2 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 10pt; }
+    .s1 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 10pt; }
+    h1 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 11pt; }
+    .s2 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 20pt; }
+    .s3 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 11pt; }
+    .s4 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 11pt; }
+    .s5 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 10pt; }
+    p { color: black; font-family: Arial, sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 9pt; margin: 0pt; }
     table, tbody { vertical-align: top; overflow: visible; }
-    /* footer placement: keep inside page margins */
-    .footer { position: absolute; left: 12mm; right: 12mm; bottom: 12mm; }
     @media print { .page-break { page-break-after: always; } }
   `;
 
