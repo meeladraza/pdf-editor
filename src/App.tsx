@@ -1,15 +1,29 @@
 import { useState } from 'react';
-import { Download, FileText } from 'lucide-react';
+// import { FileText } from 'lucide-react';
 import { FileUpload } from './components/FileUpload';
-import { AccountInfoForm } from './components/AccountInfoForm';
-import { Preview } from './components/Preview';
-import { TransactionRow, AccountInfo } from './types';
-import { generateHTML } from './utils/htmlGenerator';
+import { BankSelector } from './components/BankSelector';
+import { UBLAccountInfoForm } from './components/UBLAccountInfoForm';
+import { FaisalAccountInfoForm } from './components/FaisalAccountInfoForm';
+import { PreviewModal } from './components/PreviewModal';
+import {
+  TransactionRow,
+  FaisalTransactionRow,
+  UBLAccountInfo,
+  FaisalAccountInfo,
+  BankType
+} from './types';
+import { generateUBLHTML } from './utils/UblHtmlGenerator';
+import { generateFaisalHTML } from './utils/faisalHTMLGenerator';
 import { generatePDF, downloadPDF } from './utils/pdfGenerator';
 
 function App() {
-  const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [accountInfo, setAccountInfo] = useState<AccountInfo>({
+  const [selectedBank, setSelectedBank] = useState<BankType>('ubl');
+  const [ublTransactions, setUblTransactions] = useState<TransactionRow[]>([]);
+  const [faisalTransactions, setFaisalTransactions] = useState<FaisalTransactionRow[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [htmlContent, setHtmlContent] = useState<string>('');
+
+  const [ublAccountInfo, setUblAccountInfo] = useState<UBLAccountInfo>({
     branchCode: '0004-AMEEN SALEH MUHAMMAD ST. KHI',
     accountTitle: 'AR INDUSTRIES',
     address1: 'PLOT NO L-18 BLOCK NO 22',
@@ -26,72 +40,126 @@ function App() {
     balance: '3,207,779.56 Cr',
     asOf: '13-OCT-2025',
   });
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleDataLoaded = (data: TransactionRow[]) => {
-    setTransactions(data);
-    const html = generateHTML(data, accountInfo);
-    setHtmlContent(html);
+  const [faisalAccountInfo, setFaisalAccountInfo] = useState<FaisalAccountInfo>({
+    accountNo: '0134007000004420',
+    accountTitle: 'A R INDUSTRIES',
+    address: 'PLOT NO.L-18 BLOCK NO.22 F.B AREA KARACHI',
+    phoneNo: '03219216849',
+    depositType: 'CURRENT',
+    currency: 'PKR',
+    statementPeriodFrom: '20-10-2025',
+    statementPeriodTo: '20-10-2025',
+    statementDate: '22-10-2025 13:40:49',
+  });
+
+  const handleBankChange = (bank: BankType) => {
+    setSelectedBank(bank);
+    setUblTransactions([]);
+    setFaisalTransactions([]);
+    setHtmlContent('');
   };
 
-  const handleAccountInfoChange = (info: AccountInfo) => {
-    setAccountInfo(info);
-    if (transactions.length > 0) {
-      const html = generateHTML(transactions, info);
+  const handleDataLoaded = (data: TransactionRow[] | FaisalTransactionRow[]) => {
+    if (selectedBank === 'ubl') {
+      setUblTransactions(data as TransactionRow[]);
+    } else {
+      setFaisalTransactions(data as FaisalTransactionRow[]);
+    }
+  };
+
+  const handleUBLAccountInfoChange = (info: UBLAccountInfo) => {
+    setUblAccountInfo(info);
+  };
+
+  const handleFaisalAccountInfoChange = (info: FaisalAccountInfo) => {
+    setFaisalAccountInfo(info);
+  };
+
+  const handleGeneratePreview = () => {
+    let html = '';
+
+    if (selectedBank === 'ubl' && ublTransactions.length > 0) {
+      html = generateUBLHTML(ublTransactions, ublAccountInfo);
+    } else if (selectedBank === 'faisal' && faisalTransactions.length > 0) {
+      html = generateFaisalHTML(faisalTransactions, faisalAccountInfo);
+    }
+
+    if (html) {
       setHtmlContent(html);
+      setIsModalOpen(true);
+    } else {
+      alert('Please upload an Excel file first');
     }
   };
 
   const handleDownloadPDF = async () => {
     if (!htmlContent) {
-      alert('Please upload an Excel file first');
+      alert('Please generate preview first');
       return;
     }
 
-    setIsGenerating(true);
     try {
       const pdfData = await generatePDF(htmlContent);
-      downloadPDF(pdfData, 'bank-statement.pdf');
+      const filename = `${selectedBank}-bank-statement.pdf`;
+      downloadPDF(pdfData, filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
-    } finally {
-      setIsGenerating(false);
+      throw error;
     }
   };
 
+  const hasTransactions = selectedBank === 'ubl'
+    ? ublTransactions.length > 0
+    : faisalTransactions.length > 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <FileText className="w-12 h-12 text-blue-600 mr-3" />
+            {/* <FileText className="w-12 h-12 text-blue-600 mr-3" /> */}
             <h1 className="text-4xl font-bold text-gray-800">Bank Statement Generator</h1>
           </div>
-          <p className="text-gray-600">Upload your Excel file to generate a professional PDF bank statement</p>
+          <p className="text-gray-600">Select your bank, upload Excel file, and generate professional PDF bank statements</p>
         </div>
 
-        <div className="flex flex-col items-center gap-8">
-          <FileUpload onDataLoaded={handleDataLoaded} />
+        <div className="flex flex-col items-center gap-6">
+          <BankSelector selectedBank={selectedBank} onBankChange={handleBankChange} />
 
-          {transactions.length > 0 && (
+          <FileUpload onDataLoaded={handleDataLoaded} bankType={selectedBank} />
+
+          {hasTransactions && (
             <>
-              <AccountInfoForm accountInfo={accountInfo} onChange={handleAccountInfoChange} />
+              {selectedBank === 'ubl' ? (
+                <UBLAccountInfoForm
+                  accountInfo={ublAccountInfo}
+                  onChange={handleUBLAccountInfoChange}
+                />
+              ) : (
+                <FaisalAccountInfoForm
+                  accountInfo={faisalAccountInfo}
+                  onChange={handleFaisalAccountInfoChange}
+                />
+              )}
 
               <button
-                onClick={handleDownloadPDF}
-                disabled={isGenerating}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-md"
+                onClick={handleGeneratePreview}
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md text-lg"
               >
-                <Download className="w-5 h-5" />
-                {isGenerating ? 'Generating PDF...' : 'Download PDF'}
+                Generate Preview
               </button>
-
-              <Preview htmlContent={htmlContent} />
             </>
           )}
         </div>
+
+        <PreviewModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          htmlContent={htmlContent}
+          onDownloadPDF={handleDownloadPDF}
+        />
       </div>
     </div>
   );

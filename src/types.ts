@@ -1,3 +1,5 @@
+export type BankType = 'ubl' | 'faisal';
+
 export interface TransactionRow {
   date: string;
   particulars: string;
@@ -9,7 +11,18 @@ export interface TransactionRow {
   isClosingBalance?: boolean;
 }
 
-export interface AccountInfo {
+export interface FaisalTransactionRow {
+  postingDate: string;
+  effectiveDate: string;
+  narration: string;
+  referenceNo: string;
+  withdrawal: string;
+  deposit: string;
+  balance: string;
+  isOpeningBalance?: boolean;
+}
+
+export interface UBLAccountInfo {
   branchCode: string;
   accountTitle: string;
   address1: string;
@@ -25,4 +38,16 @@ export interface AccountInfo {
   currency: string;
   balance: string;
   asOf: string;
+}
+
+export interface FaisalAccountInfo {
+  accountNo: string;
+  accountTitle: string;
+  address: string;
+  phoneNo: string;
+  depositType: string;
+  currency: string;
+  statementPeriodFrom: string;
+  statementPeriodTo: string;
+  statementDate: string;
 }

@@ -1,19 +1,26 @@
-import { Upload } from 'lucide-react';
-import { TransactionRow } from '../types';
+// import { Upload } from 'lucide-react';
+import { TransactionRow, FaisalTransactionRow, BankType } from '../types';
 import { parseExcelFile } from '../utils/excelParser';
+import { parseFaisalExcelFile } from '../utils/faisalExcelParser';
 
 interface FileUploadProps {
-  onDataLoaded: (transactions: TransactionRow[]) => void;
+  onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
+  bankType: BankType;
 }
 
-export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
+export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
-      const transactions = await parseExcelFile(file);
-      onDataLoaded(transactions);
+      if (bankType === 'ubl') {
+        const transactions = await parseExcelFile(file);
+        onDataLoaded(transactions);
+      } else {
+        const transactions = await parseFaisalExcelFile(file);
+        onDataLoaded(transactions);
+      }
     } catch (error) {
       console.error('Error parsing Excel file:', error);
       alert('Failed to parse Excel file. Please check the file format.');
@@ -27,7 +34,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors"
       >
         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-          <Upload className="w-10 h-10 mb-3 text-gray-400" />
+          {/* <Upload className="w-10 h-10 mb-3 text-gray-400" /> */}
           <p className="mb-2 text-sm text-gray-500">
             <span className="font-semibold">Click to upload</span> or drag and drop
           </p>
