@@ -55,13 +55,28 @@ const generateHeaderSection = (
   `;
 
   return `
-  <img src="/ubl-header (1).png" alt="UB Header" style="width: 962px; max-width: 100%; height: auto; display: block; margin: 0 auto 6px;" />
+    <img src="/ubl-header (1).png" alt="UB Header" style="width: 962px; max-width: 100%; height: auto; display: block; margin: 0 auto 6px;" />
     <h2 style="margin-top: -15px; padding-left: 3pt; text-indent: 43pt; line-height: 125%; text-align: left;">
       ${accountInfo.branchCode}
     </h2>
     ${isFirstPage ? accountInfoDiv : ""}
-    <p class="s2" style="padding-top: 1pt; padding-bottom: 2pt; text-indent: 0pt; text-align: right; padding-right: 83pt;">Account Statement</p>
-    <p style="text-indent: 0pt; text-align: left"><br /></p>
+    ${isFirstPage ? `<p class="s2" style="padding-top: 1pt; padding-bottom: 2pt; text-indent: 0pt; text-align: right; padding-right: 83pt;">Account Statement</p>` : ""}
+    ${!isFirstPage ? `<p class="s2" style="padding-top: 1pt; padding-bottom: 0pt; text-indent: 0pt; text-align: right; padding-right: 83pt; line-height: 8pt;">Account Statement</p>` : ""}
+     ${!isFirstPage ? generateAccountHeaderDiv(accountInfo) : ""}
+${isFirstPage ? `<p style="text-indent: 0pt; text-align: left"><br /></p>` : ""}
+  `;
+};
+
+const generateAccountHeaderDiv = (accountInfo: UBLAccountInfo) => {
+  return `
+    <div style="width: 100%; display: flex; justify-content: space-between; padding-right: 6pt; padding-left: 3pt; padding-bottom: 4pt;">
+      <span style="font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold;">
+        ${accountInfo.accountTitle}
+      </span>
+      <span style="font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; padding-right: 10pt;">
+        ${accountInfo.accountNo}
+      </span>
+    </div>
   `;
 };
 
@@ -85,17 +100,24 @@ const generateTableHeader = () => {
           <p class="s3" style="text-indent: 0pt; text-align: center;">Credit</p>
         </td>
         <td style="width: 109pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-          <p class="s3" style="padding-left: 36pt; text-indent: 0pt; text-align: left;">Balance</p>
+          <p class="s3" style="padding-right: 2pt; text-indent: 0pt; text-align: right;">Balance</p>
         </td>
       </tr>
     </thead>
   `;
 };
 
-const generateTransactionRow = (transaction: TransactionRow) => {
+const generateTransactionRow = (
+  transaction: TransactionRow,
+  isLastOnPage: boolean = false,
+) => {
   const styleClass =
     transaction.isOpeningBalance || transaction.isClosingBalance ? "s3" : "s4";
   const particularsLines = transaction.particulars.split("\n");
+  // Bottom border string applied only to the last row on a page
+  const bb = isLastOnPage
+    ? "border-bottom-style: solid; border-bottom-width: 1pt;"
+    : "";
 
   let rowsHtml = "";
 
@@ -107,7 +129,7 @@ const generateTransactionRow = (transaction: TransactionRow) => {
       <tr style="height: ${isLastLine ? "12pt" : "13pt"}">
         ${
           isFirstLine
-            ? `<td style="width: 78pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;" ${
+            ? `<td style="width: 78pt; border-left-style: solid; border-left-width: 1pt; ${bb} border-right-style: solid; border-right-width: 1pt;" ${
                 particularsLines.length > 1
                   ? `rowspan="${particularsLines.length}"`
                   : ""
@@ -118,14 +140,14 @@ const generateTransactionRow = (transaction: TransactionRow) => {
         </td>`
             : ""
         }
-        <td style="width: 261pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;">
+        <td style="width: 261pt; border-left-style: solid; border-left-width: 1pt; ${isLastOnPage && isLastLine ? bb : ""} border-right-style: solid; border-right-width: 1pt;">
           <p class="${styleClass}" style="padding-left: 2pt; text-indent: 0pt; line-height: 11pt; text-align: left;">${
             particularsLines[i]
           }</p>
         </td>
         ${
           isFirstLine
-            ? `<td style="width: 72pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;" ${
+            ? `<td style="width: 72pt; border-left-style: solid; border-left-width: 1pt; ${bb} border-right-style: solid; border-right-width: 1pt;" ${
                 particularsLines.length > 1
                   ? `rowspan="${particularsLines.length}"`
                   : ""
@@ -138,7 +160,7 @@ const generateTransactionRow = (transaction: TransactionRow) => {
         }
         ${
           isFirstLine
-            ? `<td style="width: 93pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;" ${
+            ? `<td style="width: 93pt; border-left-style: solid; border-left-width: 1pt; ${bb} border-right-style: solid; border-right-width: 1pt;" ${
                 particularsLines.length > 1
                   ? `rowspan="${particularsLines.length}"`
                   : ""
@@ -153,7 +175,7 @@ const generateTransactionRow = (transaction: TransactionRow) => {
         }
         ${
           isFirstLine
-            ? `<td style="width: 95pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;" ${
+            ? `<td style="width: 95pt; border-left-style: solid; border-left-width: 1pt; ${bb} border-right-style: solid; border-right-width: 1pt;" ${
                 particularsLines.length > 1
                   ? `rowspan="${particularsLines.length}"`
                   : ""
@@ -166,12 +188,12 @@ const generateTransactionRow = (transaction: TransactionRow) => {
         }
         ${
           isFirstLine
-            ? `<td style="width: 109pt; border-left-style: solid; border-left-width: 1pt; border-right-style: solid; border-right-width: 1pt;" ${
+            ? `<td style="width: 109pt; border-left-style: solid; border-left-width: 1pt; ${bb} border-right-style: solid; border-right-width: 1pt;" ${
                 particularsLines.length > 1
                   ? `rowspan="${particularsLines.length}"`
                   : ""
               }>
-          <p class="${styleClass}" style="padding-left: 45pt; text-indent: 0pt; line-height: 11pt; text-align: left;">${
+          <p class="${styleClass}" style="padding-right: 2pt; text-indent: 0pt; line-height: 11pt; text-align: right;">${
             transaction.balance
           }</p>
         </td>`
@@ -242,35 +264,125 @@ const generateFooter = (pageNum: number, totalPages: number) => {
       <h2 style="position: absolute; right: 20pt; bottom: 110pt; text-indent: 0pt; text-align: right; font-size: 10pt;">
         Page # ${pageNum} / ${totalPages}
       </h2>
-      <img src="/footer (1).png" alt="UB Footer" style="width: 100%; height: auto; display: block; margin: 0;" />
+      <img src="/footer (1).png" alt="UB Footer" style="width: 100%; height: auto; display: block; margin: 0; z-index: 1;" />
+    </div>
+  `;
+};
+
+// A4 page height in effective CSS pt for a 962px-wide content wrapper.
+// Chromium scales 962px content to fit A4 width (595pt), scale ≈ 0.825.
+// Effective page height = 842pt / 0.825 ≈ 1021pt.
+const A4_HEIGHT_PT = 1021;
+// Space reserved at the bottom for footer (matches margin-bottom: 120pt on table div)
+const FOOTER_RESERVED_PT = 120;
+// Tfoot totals row height (only on last page)
+const TFOOT_HEIGHT_PT = 39;
+
+// Estimated overhead height per page type (header + table header)
+// First page: logo image ~60pt + branch code ~18pt + account info box ~120pt +
+//             "Account Statement" text ~30pt + br spacer ~13pt + table header 18pt
+const FIRST_PAGE_HEADER_PT = 259;
+// Subsequent pages: logo ~60pt + branch code ~18pt + title/no row ~22pt +
+//                   "Account Statement" ~15pt + table header 18pt
+const OTHER_PAGE_HEADER_PT = 133;
+
+// Available height for transaction rows on each page type
+const FIRST_PAGE_ROWS_PT =
+  A4_HEIGHT_PT - FIRST_PAGE_HEADER_PT - FOOTER_RESERVED_PT - TFOOT_HEIGHT_PT;
+const OTHER_PAGE_ROWS_PT =
+  A4_HEIGHT_PT - OTHER_PAGE_HEADER_PT - FOOTER_RESERVED_PT - TFOOT_HEIGHT_PT;
+
+// Each particulars line height in pt (matches tr height: 13pt / 12pt)
+const ROW_LINE_PT = 13;
+const ROW_LAST_LINE_PT = 12;
+
+const getTransactionRowHeight = (transaction: TransactionRow): number => {
+  const lineCount = transaction.particulars.split("\n").length;
+  return (lineCount - 1) * ROW_LINE_PT + ROW_LAST_LINE_PT;
+};
+
+const paginateTransactions = (
+  transactions: TransactionRow[],
+): TransactionRow[][] => {
+  const pages: TransactionRow[][] = [];
+  let currentPage: TransactionRow[] = [];
+  let currentHeight = 0;
+  let availableHeight = FIRST_PAGE_ROWS_PT;
+
+  for (const tx of transactions) {
+    const rowHeight = getTransactionRowHeight(tx);
+    if (currentHeight + rowHeight > availableHeight && currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [];
+      currentHeight = 0;
+      availableHeight = OTHER_PAGE_ROWS_PT;
+    }
+    currentPage.push(tx);
+    currentHeight += rowHeight;
+  }
+
+  if (currentPage.length > 0) {
+    pages.push(currentPage);
+  }
+
+  return pages.length > 0 ? pages : [[]];
+};
+
+const generatePageContent = (
+  transactions: TransactionRow[],
+  accountInfo: UBLAccountInfo,
+  isFirstPage: boolean,
+  pageNum: number,
+  totalPages: number,
+): string => {
+  const tableHeader = generateTableHeader();
+
+  let tableRows = "";
+  transactions.forEach((tx, idx) => {
+    const isLastOnPage = idx === transactions.length - 1;
+    tableRows += generateTransactionRow(tx, isLastOnPage);
+  });
+
+  const totalsTableContent =
+    pageNum === totalPages ? generateTotalsTable(transactions) : "";
+
+  return `
+    <div style="page-break-before: ${isFirstPage ? "auto" : "always"}; position: relative; min-height: 100vh; display: flex; flex-direction: column;">
+      ${generateHeaderSection(accountInfo, isFirstPage)}
+      <div style="padding-left: 3pt; padding-right: 6pt; flex-grow: 1; margin-bottom: 120pt; z-index: 4;">
+        <table style="width: 100%; border-collapse: collapse;" cellspacing="0">
+          ${tableHeader}
+          <tbody>
+            ${tableRows}
+          </tbody>
+          ${totalsTableContent}
+        </table>
+      </div>
+      ${generateFooter(pageNum, totalPages)}
     </div>
   `;
 };
 
 export const generateUBLHTML = (
-  transactions: TransactionRow[],
+  allTransactions: TransactionRow[],
   accountInfo: UBLAccountInfo,
 ): string => {
-  const tableHeader = generateTableHeader();
+  const pages = paginateTransactions(allTransactions);
 
-  let tableRows = "";
-  transactions.forEach((tx) => {
-    tableRows += generateTransactionRow(tx);
-  });
+  const totalPages = Math.max(1, pages.length);
 
-  const totalsTableContent = generateTotalsTable(transactions);
-
-  const pageHtml = `
-    <div style="padding-left: 3pt; padding-right: 6pt">
-      <table style="width: 100%; border-collapse: collapse;" cellspacing="0">
-        ${tableHeader}
-        <tbody>
-          ${tableRows}
-        </tbody>
-        ${totalsTableContent}
-      </table>
-    </div>
-  `;
+  // Generate pages
+  let pagesHtml = pages
+    .map((pageTransactions, index) =>
+      generatePageContent(
+        pageTransactions,
+        accountInfo,
+        index === 0,
+        index + 1,
+        totalPages,
+      ),
+    )
+    .join("");
 
   const styles = `
     @page { 
@@ -384,10 +496,8 @@ export const generateUBLHTML = (
         <style type="text/css">${styles}</style>
       </head>
       <body>
-        <div style="position: relative; width: 962px; margin: auto;">
-          ${generateHeaderSection(accountInfo, true)}
-          ${pageHtml}
-          ${generateFooter(1, 1)}
+        <div style="width: 962px; margin: auto;">
+          ${pagesHtml}
         </div>
       </body>
     </html>
