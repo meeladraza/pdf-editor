@@ -1,20 +1,6 @@
 import { TransactionRow, UBLAccountInfo } from "../types";
 import { formatNumber } from "./excelParser";
 
-const FIRST_PAGE_MAX_HEIGHT = 640;
-const OTHER_PAGE_MAX_HEIGHT = 620;
-const ROW_HEIGHT_BASE = 13;
-const ROW_HEIGHT_LAST_LINE = 12;
-const TABLE_HEADER_HEIGHT = 18;
-
-const calculateTransactionHeight = (transaction: TransactionRow): number => {
-  const particularsLines = transaction.particulars.split("\n");
-  if (particularsLines.length === 1) {
-    return ROW_HEIGHT_BASE;
-  }
-  return (particularsLines.length - 1) * ROW_HEIGHT_BASE + ROW_HEIGHT_LAST_LINE;
-};
-
 const generateHeaderSection = (
   accountInfo: UBLAccountInfo,
   isFirstPage: boolean,
@@ -81,26 +67,28 @@ const generateHeaderSection = (
 
 const generateTableHeader = () => {
   return `
-    <tr style="height: 18pt">
-      <td style="width: 78pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="padding-right: 2pt; text-indent: 0pt; text-align: center;">Date</p>
-      </td>
-      <td style="width: 261pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="padding-right: 9pt; text-indent: 0pt; line-height: 12pt; text-align: center;">Particulars</p>
-      </td>
-      <td style="width: 72pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="padding-left: 17pt; text-indent: 0pt; text-align: left;">Inst No.</p>
-      </td>
-      <td style="width: 93pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="padding-left: 34pt; text-indent: 0pt; text-align: left;">Debit</p>
-      </td>
-      <td style="width: 95pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="text-indent: 0pt; text-align: center;">Credit</p>
-      </td>
-      <td style="width: 109pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-        <p class="s3" style="padding-left: 36pt; text-indent: 0pt; text-align: left;">Balance</p>
-      </td>
-    </tr>
+    <thead>
+      <tr style="height: 18pt">
+        <td style="width: 78pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="padding-right: 2pt; text-indent: 0pt; text-align: center;">Date</p>
+        </td>
+        <td style="width: 261pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="padding-right: 9pt; text-indent: 0pt; line-height: 12pt; text-align: center;">Particulars</p>
+        </td>
+        <td style="width: 72pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="padding-left: 17pt; text-indent: 0pt; text-align: left;">Inst No.</p>
+        </td>
+        <td style="width: 93pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="padding-left: 34pt; text-indent: 0pt; text-align: left;">Debit</p>
+        </td>
+        <td style="width: 95pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="text-indent: 0pt; text-align: center;">Credit</p>
+        </td>
+        <td style="width: 109pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
+          <p class="s3" style="padding-left: 36pt; text-indent: 0pt; text-align: left;">Balance</p>
+        </td>
+      </tr>
+    </thead>
   `;
 };
 
@@ -216,7 +204,7 @@ const generateTotalsTable = (transactions: TransactionRow[]) => {
   });
 
   return `
-    <table style="border-collapse: collapse; margin-top: 1pt;">
+    <tfoot>
       <tr style="height: 39pt">
         <td style="width: 339pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt;" colspan="2">
           <p class="s3" style="padding-top: 6pt; padding-left: 72pt; padding-right: 94pt; text-indent: 0pt; line-height: 118%; text-align: left;">
@@ -241,7 +229,7 @@ const generateTotalsTable = (transactions: TransactionRow[]) => {
           <p style="text-indent: 0pt; text-align: left"><br /></p>
         </td>
       </tr>
-    </table>
+    </tfoot>
   `;
 };
 
@@ -263,88 +251,129 @@ export const generateUBLHTML = (
   transactions: TransactionRow[],
   accountInfo: UBLAccountInfo,
 ): string => {
-  const pages: TransactionRow[][] = [];
-  let currentPageTransactions: TransactionRow[] = [];
-  let currentHeight = 0;
-  let isFirstPage = true;
+  const tableHeader = generateTableHeader();
 
-  for (let i = 0; i < transactions.length; i++) {
-    const transaction = transactions[i];
-    const transactionHeight = calculateTransactionHeight(transaction);
-    const maxHeight = isFirstPage
-      ? FIRST_PAGE_MAX_HEIGHT
-      : OTHER_PAGE_MAX_HEIGHT;
-
-    if (
-      currentHeight + transactionHeight > maxHeight &&
-      currentPageTransactions.length > 0
-    ) {
-      pages.push([...currentPageTransactions]);
-      currentPageTransactions = [];
-      currentHeight = TABLE_HEADER_HEIGHT;
-      isFirstPage = false;
-    }
-
-    currentPageTransactions.push(transaction);
-    currentHeight += transactionHeight;
-  }
-
-  if (currentPageTransactions.length > 0) {
-    pages.push(currentPageTransactions);
-  }
-
-  const totalPages = pages.length;
-  const htmlPages: string[] = [];
-
-  pages.forEach((pageTransactions, pageIndex) => {
-    const isFirst = pageIndex === 0;
-    const isLast = pageIndex === totalPages - 1;
-    const pageNum = pageIndex + 1;
-
-    const headerSection = generateHeaderSection(accountInfo, isFirst);
-    const tableHeader = generateTableHeader();
-
-    let tableRows = "";
-    pageTransactions.forEach((tx) => {
-      tableRows += generateTransactionRow(tx);
-    });
-
-    const totalsTable = isLast ? generateTotalsTable(transactions) : "";
-    const footer = generateFooter(pageNum, totalPages);
-
-    const pageHtml = `
-      <div style="position: relative; width: 962px; height: 1122px; margin: auto; page-break-after: always; overflow: hidden;">
-        <div style="position: static; width: 100%; z-index: 2; padding-bottom: 100px;">
-          ${headerSection}
-          <div style="padding-left: 3pt; padding-right: 6pt">
-            <table style="border-collapse: collapse" cellspacing="0">
-              ${tableHeader}
-              ${tableRows}
-            </table>
-            ${totalsTable}
-          </div>
-        </div>
-        
-      </div>
-    `;
-
-    htmlPages.push(pageHtml);
+  let tableRows = "";
+  transactions.forEach((tx) => {
+    tableRows += generateTransactionRow(tx);
   });
 
+  const totalsTableContent = generateTotalsTable(transactions);
+
+  const pageHtml = `
+    <div style="padding-left: 3pt; padding-right: 6pt">
+      <table style="width: 100%; border-collapse: collapse;" cellspacing="0">
+        ${tableHeader}
+        <tbody>
+          ${tableRows}
+        </tbody>
+        ${totalsTableContent}
+      </table>
+    </div>
+  `;
+
   const styles = `
-    @page { margin: 0; size: A4; }
-    body { margin: 0; padding: 0; }
-    * { margin: 0; padding: 0; text-indent: 0; }
-    h2 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 10pt; }
-    .s1 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 10pt; }
-    h1 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 11pt; }
-    .s2 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 20pt; }
-    .s3 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 11pt; }
-    .s4 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 11pt; }
-    .s5 { color: black; font-family: "Times New Roman", serif; font-style: normal; font-weight: normal; text-decoration: none; font-size: 10pt; }
-    p { color: black; font-family: Arial, sans-serif; font-style: normal; font-weight: bold; text-decoration: none; font-size: 9pt; margin: 0pt; }
-    table, tbody { vertical-align: top; overflow: visible; }
-    @media print { .page-break { page-break-after: always; } }
+    @page { 
+      margin: 0; 
+      size: A4; 
+    }
+    @media print {
+      body { 
+        margin: 0; 
+        padding: 0; 
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead {
+        display: table-header-group;
+      }
+      tfoot {
+        display: table-footer-group;
+      }
+      tr {
+        page-break-inside: avoid;
+      }
+    }
+    body { 
+      margin: 0; 
+      padding: 0; 
+    }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      text-indent: 0; 
+    }
+    h2 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: bold; 
+      text-decoration: none; 
+      font-size: 10pt; 
+    }
+    .s1 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: normal; 
+      text-decoration: none; 
+      font-size: 10pt; 
+    }
+    h1 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: bold; 
+      text-decoration: none; 
+      font-size: 11pt; 
+    }
+    .s2 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: normal; 
+      text-decoration: none; 
+      font-size: 20pt; 
+    }
+    .s3 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: bold; 
+      text-decoration: none; 
+      font-size: 11pt; 
+    }
+    .s4 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: normal; 
+      text-decoration: none; 
+      font-size: 11pt; 
+    }
+    .s5 { 
+      color: black; 
+      font-family: "Times New Roman", serif; 
+      font-style: normal; 
+      font-weight: normal; 
+      text-decoration: none; 
+      font-size: 10pt; 
+    }
+    p { 
+      color: black; 
+      font-family: Arial, sans-serif; 
+      font-style: normal; 
+      font-weight: bold; 
+      text-decoration: none; 
+      font-size: 9pt; 
+      margin: 0pt; 
+    }
+    table, tbody { 
+      vertical-align: top; 
+      overflow: visible; 
+    }
   `;
 
   return `
@@ -355,7 +384,11 @@ export const generateUBLHTML = (
         <style type="text/css">${styles}</style>
       </head>
       <body>
-        ${htmlPages.join("")}
+        <div style="position: relative; width: 962px; margin: auto;">
+          ${generateHeaderSection(accountInfo, true)}
+          ${pageHtml}
+          ${generateFooter(1, 1)}
+        </div>
       </body>
     </html>
   `;

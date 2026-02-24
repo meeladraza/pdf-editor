@@ -102,7 +102,7 @@
 // ============================================================
 // CONFIG - change this to your Gotenberg server URL
 // ============================================================
-const GOTENBERG_URL = 'http://localhost:4000'; // or your Render/Railway URL
+const GOTENBERG_URL = 'http://59.103.117.15:4000'; // or your Render/Railway URL
 // e.g. 'https://your-gotenberg-app.onrender.com'
 
 // ============================================================
@@ -153,7 +153,7 @@ const embedImages = async (html: string): Promise<string> => {
 // ============================================================
 // MAIN: Generate PDF using Gotenberg
 // ============================================================
-const PROXY_URL = 'http://localhost:4000'; // your Node proxy
+const PROXY_URL = 'http://59.103.117.15:4000'; // your Node proxy
 
 export const generatePDF = async (htmlContent: string): Promise<ArrayBuffer> => {
   try {
