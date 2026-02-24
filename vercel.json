@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/generate-pdf",
+      "destination": "http://59.103.117.15:4000/generate-pdf"
+    }
+  ]
+}
