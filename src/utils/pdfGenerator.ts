@@ -97,12 +97,10 @@
 //   window.URL.revokeObjectURL(url);
 // };
 
-
-
 // ============================================================
 // CONFIG - change this to your Gotenberg server URL
 // ============================================================
-const GOTENBERG_URL = 'http://59.103.117.15:4000'; // or your Render/Railway URL
+const GOTENBERG_URL = "http://59.103.117.15:4000"; // or your Render/Railway URL
 // e.g. 'https://your-gotenberg-app.onrender.com'
 
 // ============================================================
@@ -111,16 +109,16 @@ const GOTENBERG_URL = 'http://59.103.117.15:4000'; // or your Render/Railway URL
 const embedImages = async (html: string): Promise<string> => {
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const imgs = Array.from(doc.getElementsByTagName('img'));
+    const doc = parser.parseFromString(html, "text/html");
+    const imgs = Array.from(doc.getElementsByTagName("img"));
 
     await Promise.all(
       imgs.map(async (img) => {
-        const src = img.getAttribute('src');
-        if (!src || src.startsWith('data:')) return;
+        const src = img.getAttribute("src");
+        if (!src || src.startsWith("data:")) return;
 
         let imageUrl = src;
-        if (src.startsWith('/')) {
+        if (src.startsWith("/")) {
           imageUrl = window.location.origin + src;
         } else if (!/^https?:\/\//i.test(src)) {
           imageUrl = new URL(src, window.location.href).toString();
@@ -136,16 +134,16 @@ const embedImages = async (html: string): Promise<string> => {
             reader.onerror = (e) => reject(e);
             reader.readAsDataURL(blob);
           });
-          img.setAttribute('src', dataUrl);
+          img.setAttribute("src", dataUrl);
         } catch (e) {
-          console.warn('Failed to inline image', src, e);
+          console.warn("Failed to inline image", src, e);
         }
-      })
+      }),
     );
 
     return doc.documentElement.outerHTML;
   } catch (e) {
-    console.warn('embedImages error', e);
+    console.warn("embedImages error", e);
     return html;
   }
 };
@@ -153,17 +151,19 @@ const embedImages = async (html: string): Promise<string> => {
 // ============================================================
 // MAIN: Generate PDF using Gotenberg
 // ============================================================
-const PROXY_URL = '/api'; // your Node proxy
+const PROXY_URL = import.meta.env.PROD ? "/api" : "http://59.103.117.15:4000"; // your Node proxy
 
-export const generatePDF = async (htmlContent: string): Promise<ArrayBuffer> => {
+export const generatePDF = async (
+  htmlContent: string,
+): Promise<ArrayBuffer> => {
   try {
     const htmlWithImages = await embedImages(htmlContent);
 
     // ✅ Now send JSON to YOUR proxy (no CORS issue)
     const response = await fetch(`${PROXY_URL}/generate-pdf`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ html: htmlWithImages }),
     });
@@ -174,9 +174,8 @@ export const generatePDF = async (htmlContent: string): Promise<ArrayBuffer> => 
     }
 
     return await response.arrayBuffer();
-
   } catch (error) {
-    console.error('PDF generation failed:', error);
+    console.error("PDF generation failed:", error);
     throw error;
   }
 };
@@ -184,10 +183,13 @@ export const generatePDF = async (htmlContent: string): Promise<ArrayBuffer> => 
 // ============================================================
 // Download helper (unchanged from your original)
 // ============================================================
-export const downloadPDF = (pdfData: ArrayBuffer, filename: string = 'bank-statement.pdf') => {
-  const blob = new Blob([pdfData], { type: 'application/pdf' });
+export const downloadPDF = (
+  pdfData: ArrayBuffer,
+  filename: string = "bank-statement.pdf",
+) => {
+  const blob = new Blob([pdfData], { type: "application/pdf" });
   const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
