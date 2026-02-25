@@ -53,7 +53,8 @@ function App() {
     {
       accountNo: "0134007000004420",
       accountTitle: "A R INDUSTRIES",
-      address: "PLOT NO.L-18 BLOCK NO.22 F.B AREA KARACHI",
+      address: "PLOT NO.L-18 BLOCK NO.22",
+      address2: "F.B AREA KARACHI",
       phoneNo: "03219216849",
       depositType: "CURRENT",
       currency: "PKR",

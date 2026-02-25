@@ -46,6 +46,7 @@ export interface FaisalAccountInfo {
   accountNo: string;
   accountTitle: string;
   address: string;
+  address2: string;
   phoneNo: string;
   depositType: string;
   currency: string;
