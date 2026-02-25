@@ -3,6 +3,7 @@ import { TransactionRow, FaisalTransactionRow, BankType } from '../types';
 import { parseExcelFile } from '../utils/excelParser';
 import { parseFaisalExcelFile } from '../utils/faisalExcelParser';
 import { parseMeezanExcelFile } from '../utils/meezanExcelParser';
+import { parseMetroExcelFile } from '../utils/metroExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -23,6 +24,9 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
         onDataLoaded(transactions);
       } else if (bankType === 'meezan') {
         const transactions = await parseMeezanExcelFile(file);
+        onDataLoaded(transactions);
+      } else if (bankType === 'metro') {
+        const transactions = await parseMetroExcelFile(file);
         onDataLoaded(transactions);
       }
     } catch (error) {

@@ -13,7 +13,7 @@ export const BankSelector = ({ selectedBank, onBankChange }: BankSelectorProps) 
         {/* <Building2 className="w-5 h-5 text-gray-700" /> */}
         <h2 className="text-lg font-semibold text-gray-800">Select Bank Template</h2>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         <button
           onClick={() => onBankChange('ubl')}
           className={`p-4 rounded-lg border-2 transition-all ${
@@ -46,6 +46,17 @@ export const BankSelector = ({ selectedBank, onBankChange }: BankSelectorProps) 
         >
           <div className="font-semibold">Meezan Bank</div>
           <div className="text-xs mt-1 opacity-75">Meezan Bank Limited</div>
+        </button>
+        <button
+          onClick={() => onBankChange('metro')}
+          className={`p-4 rounded-lg border-2 transition-all ${
+            selectedBank === 'metro'
+              ? 'border-blue-600 bg-blue-50 text-blue-700'
+              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <div className="font-semibold">Habib Metro</div>
+          <div className="text-xs mt-1 opacity-75">Habib Metropolitan Bank</div>
         </button>
       </div>
     </div>

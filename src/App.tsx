@@ -5,6 +5,7 @@ import { BankSelector } from "./components/BankSelector";
 import { UBLAccountInfoForm } from "./components/UBLAccountInfoForm";
 import { FaisalAccountInfoForm } from "./components/FaisalAccountInfoForm";
 import { MeezanAccountInfoForm } from "./components/MeezanAccountInfoForm";
+import { MetroAccountInfoForm } from "./components/MetroAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow,
@@ -12,11 +13,13 @@ import {
   UBLAccountInfo,
   FaisalAccountInfo,
   MeezanAccountInfo,
+  MetroAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
 import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
 import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
+import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -28,6 +31,7 @@ function App() {
   const [meezanTransactions, setMeezanTransactions] = useState<
     TransactionRow[]
   >([]);
+  const [metroTransactions, setMetroTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -64,6 +68,19 @@ function App() {
     },
   );
 
+  const [metroAccountInfo, setMetroAccountInfo] = useState<MetroAccountInfo>({
+    accountTitle: "S.K.F. COLLECTION",
+    address: "SHOP# 124-125 1ST FLOOR TEXTILE PLAZA\nNEAR NEW MEMON MASJID MA JINNAH\nROAD, Karachi, Pakistan",
+    branchName: "Textile Plaza Branch",
+    acType: "Demand Deposits",
+    acNumber: "6-1-42-20311-714-140781",
+    iban: "PK61MPBL0142027140781",
+    currency: "PKR",
+    from: "01-Jul-2020",
+    to: "30-Jun-2021",
+    printedOn: "27-Sep-2021",
+  });
+
   const [meezanAccountInfo, setMeezanAccountInfo] = useState<MeezanAccountInfo>(
     {
       branchName: "9937-NADIR HOUSE II-KARACHI",
@@ -89,6 +106,7 @@ function App() {
     setUblTransactions([]);
     setFaisalTransactions([]);
     setMeezanTransactions([]);
+    setMetroTransactions([]);
     setHtmlContent("");
   };
 
@@ -101,6 +119,8 @@ function App() {
       setFaisalTransactions(data as FaisalTransactionRow[]);
     } else if (selectedBank === "meezan") {
       setMeezanTransactions(data as TransactionRow[]);
+    } else if (selectedBank === "metro") {
+      setMetroTransactions(data as TransactionRow[]);
     }
   };
 
@@ -116,6 +136,10 @@ function App() {
     setMeezanAccountInfo(info);
   };
 
+  const handleMetroAccountInfoChange = (info: MetroAccountInfo) => {
+    setMetroAccountInfo(info);
+  };
+
   const handleGeneratePreview = () => {
     let html = "";
 
@@ -125,6 +149,8 @@ function App() {
       html = generateFaisalHTML(faisalTransactions, faisalAccountInfo);
     } else if (selectedBank === "meezan" && meezanTransactions.length > 0) {
       html = generateMeezanHTML(meezanTransactions, meezanAccountInfo);
+    } else if (selectedBank === "metro" && metroTransactions.length > 0) {
+      html = generateMetroHTML(metroTransactions, metroAccountInfo);
     }
 
     if (html) {
@@ -157,7 +183,9 @@ function App() {
       ? ublTransactions.length > 0
       : selectedBank === "faisal"
         ? faisalTransactions.length > 0
-        : meezanTransactions.length > 0;
+        : selectedBank === "meezan"
+          ? meezanTransactions.length > 0
+          : metroTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -195,10 +223,15 @@ function App() {
                   accountInfo={faisalAccountInfo}
                   onChange={handleFaisalAccountInfoChange}
                 />
-              ) : (
+              ) : selectedBank === "meezan" ? (
                 <MeezanAccountInfoForm
                   accountInfo={meezanAccountInfo}
                   onChange={handleMeezanAccountInfoChange}
+                />
+              ) : (
+                <MetroAccountInfoForm
+                  accountInfo={metroAccountInfo}
+                  onChange={handleMetroAccountInfoChange}
                 />
               )}
 
