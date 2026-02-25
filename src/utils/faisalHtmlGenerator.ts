@@ -61,7 +61,7 @@ const generatePageHeader = (
   totalPages: number,
 ) => `
   <div style="display:flex; align-items:flex-start; justify-content:space-between;
-              padding:12px 18px 6px 18px;">
+              padding:12px 10px 6px 10px;">
     <div>
       <img src="/faisal-logo.png" alt="Faysal Bank" style="height:55px; width:auto; display:block;" />
     </div>
@@ -73,10 +73,10 @@ const generatePageHeader = (
       </p>
     </div>
     <div style="text-align:right; padding-top:2px;">
-      <p style="font-size:12px; font-family:Arial,sans-serif; font-weight:500; margin:0;">
+      <p style="font-size:12px; font-family:Arial,sans-serif; font-weight:500; margin:0; padding-right: 20px;">
         Statement Date:&nbsp;&nbsp;${accountInfo.statementDate}
       </p>
-      <p style="padding-right: 12px; font-size:12px; font-family:Arial,sans-serif; font-weight:500; margin:7px 0 0 0;">
+      <p style="font-size:12px; font-family:Arial,sans-serif; font-weight:500; margin:7px 0 0 0; padding-right: 40px;">
         Page ${pageNum} of ${totalPages}
       </p>
     </div>
@@ -88,20 +88,20 @@ const generateAccountInfo = (accountInfo: FaisalAccountInfo) => `
   <table style="width:100%; font-size:10px; font-family:Arial,sans-serif; margin-top: 16px;
                 border-collapse:collapse;" cellspacing="0" cellpadding="0">
     <tr>
-      <td style="width:13%; text-align:right; font-weight:bold; padding:5px 4px 10px 18px;">Account No :</td>
+      <td style="width:13%; text-align:right; font-weight:bold; padding:5px 4px 10px 4px;">Account No :</td>
       <td style="width:25%; padding:5px 4px 10px 6px;">${accountInfo.accountNo}</td>
       <td style="width:12%; font-weight:bold; padding:5px 4px 10px 4px;">Title Of Account :</td>
       <td style="padding:5px 18px 10px 6px;">${accountInfo.accountTitle}</td>
     </tr>
     <tr>
-      <td style="text-align:right; font-weight:bold; padding:3px 4px 10px 18px;">Address :</td>
+      <td style="text-align:right; font-weight:bold; padding:3px 4px 10px 4px;">Address :</td>
       <td style="width:25%; padding:3px 18px 10px 6px;">
         ${accountInfo.address}
       </td>
       <td colspan="2" style="padding:3px 4px 10px 4px;">${accountInfo.address2}&nbsp;${accountInfo.phoneNo}</td>
     </tr>
     <tr>
-      <td style="text-align:right; font-weight:bold; padding:3px 4px 14px 18px;">Deposit Type :</td>
+      <td style="text-align:right; font-weight:bold; padding:3px 4px 14px 4px;">Deposit Type :</td>
       <td style="padding:3px 4px 14px 6px;">${accountInfo.depositType}</td>
       <td style="font-weight:bold; padding:3px 4px 14px 4px;"><p style="text-align: right;">Currency :</p></td>
       <td style="padding:3px 18px 14px 6px;">${accountInfo.currency}</td>
@@ -252,7 +252,7 @@ const generateSummary = (allTransactions: FaisalTransactionRow[]) => {
 
 // ── Footer disclaimer text (last page only) ───────────────────────────────────
 const generateFooterText = () => `
-  <div style="padding:14px 18px 8px 18px; font-family:Arial,sans-serif;
+  <div style="padding:14px 10px 8px 10px; font-family:Arial,sans-serif;
               font-size:9px; font-weight:500; line-height:1.5; color:#000; width:50%%;">
     <p style="margin:0; line-height:1.2;">
       ***AS PER SBP MANDATE PLEASE SUBMIT AN ATTESTED COPY OF
@@ -290,7 +290,7 @@ const generatePageContent = (
   <div style="page-break-before:${isFirstPage ? "auto" : "always"}; min-height:100vh;">
     ${generatePageHeader(accountInfo, pageNum, totalPages)}
     ${isFirstPage ? generateAccountInfo(accountInfo) : ""}
-    <div style="padding:0 18px;">
+    <div style="padding:0 10px;">
       <table style="width:100%; border-collapse:collapse;" cellspacing="0">
         ${generateTableHeader()}
         <tbody>
@@ -346,7 +346,7 @@ export const generateFaisalHTML = (
         <style>${styles}</style>
       </head>
       <body>
-        <div style="width:760px; margin:0 auto; background:#fff;">
+        <div style="width:100%; background:#fff;">
           ${pagesHtml}
         </div>
       </body>
