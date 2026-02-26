@@ -76,7 +76,7 @@ const generateAccountInfo = (info: SonehriAccountInfo) => `
   <div style="display: flex; gap: 10px; font-size: 7pt; font-weight: 580; ${FONT_PRIMARY} padding: 160px 0 10px 0;">
     <div style="width: 25%; display: flex; flex-direction: column;">
       <span style="margin-bottom: 12px;">Account</span>
-      <span style="height: 36px;">Currency</span>
+      <span style="height: 40px;">Currency</span>
       <span style="margin-bottom: 12px;">Account Type</span>
       <span style="margin-bottom: 12px;">From Date</span>
       <span style="margin-bottom: 12px;">To Date</span>
@@ -85,7 +85,7 @@ const generateAccountInfo = (info: SonehriAccountInfo) => `
     </div>
     <div style="width: 25%; display: flex; flex-direction: column;">
       <span style="margin-bottom: 12px;">${info.accountNo}</span>
-      <span style="height: 36px;">${info.currency}</span>
+      <span style="height: 40px;">${info.currency}</span>
       <span style="margin-bottom: 12px;">${info.accountType}</span>
       <span style="margin-bottom: 12px;">${info.fromDate}</span>
       <span style="margin-bottom: 12px;">${info.toDate}</span>
@@ -94,7 +94,7 @@ const generateAccountInfo = (info: SonehriAccountInfo) => `
     </div>
     <div style="width: 25%; display: flex; flex-direction: column;">
       <span style="margin-bottom: 12px;">Account Title</span>
-      <span style="height: 36px;">Customer Address</span>
+      <span style="height: 40px;">Customer Address</span>
       <span style="margin-bottom: 12px;">Customer Address</span>
       <span style="margin-bottom: 12px;">Old Number</span>
       <span style="margin-bottom: 12px;">IBAN Number</span>
@@ -103,7 +103,7 @@ const generateAccountInfo = (info: SonehriAccountInfo) => `
     </div>
     <div style="width: 25%; display: flex; flex-direction: column;">
       <span style="margin-bottom: 12px;">${info.accountTitle}</span>
-      <span style="height: 36px;">${info.address}</span>
+      <span style="height: 40px;">${info.address}</span>
       <span style="margin-bottom: 12px;">${info.address2}</span>
       <span style="margin-bottom: 12px;">${info.oldNumber}</span>
       <span style="margin-bottom: 12px;">${info.iban}</span>

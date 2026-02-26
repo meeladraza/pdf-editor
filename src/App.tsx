@@ -7,6 +7,7 @@ import { FaisalAccountInfoForm } from "./components/FaisalAccountInfoForm";
 import { MeezanAccountInfoForm } from "./components/MeezanAccountInfoForm";
 import { MetroAccountInfoForm } from "./components/MetroAccountInfoForm";
 import { SonehriAccountInfoForm } from "./components/SonehriAccountInfoForm";
+import { DubaiIslamicAccountInfoForm } from "./components/DubaiIslamicAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow,
@@ -16,6 +17,7 @@ import {
   MeezanAccountInfo,
   MetroAccountInfo,
   SonehriAccountInfo,
+  DubaiIslamicAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
@@ -23,6 +25,7 @@ import { generateFaisalHTML } from "./utils/faisalHTMLGenerator";
 import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
 import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
+import { generateDubaiHTML } from "./utils/dubaiHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -36,6 +39,7 @@ function App() {
   >([]);
   const [metroTransactions, setMetroTransactions] = useState<TransactionRow[]>([]);
   const [sonehriTransactions, setSonehriTransactions] = useState<TransactionRow[]>([]);
+  const [dubaiTransactions, setDubaiTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -121,6 +125,21 @@ function App() {
     printedDateTime: "25 OCT 2025 10:32:7 ",
   });
 
+  const [dubaiAccountInfo, setDubaiAccountInfo] = useState<DubaiIslamicAccountInfo>({
+    fromPeriod: "13-Feb-2026",
+    toPeriod: "23-Feb-2026",
+    currency: "PKR",
+    address: "PLOT NO L 18/1/1/4 BLOCK\n22 FB AREA KARACHI",
+    accountTitle: "RADIUM SILK FACTORY",
+    accountType: "Current Accounts - Normal",
+    acOpeningDate: "29-May-2015",
+    accountNo: "0185811002",
+    iban: "PK08DUIB0000000185811002",
+    branch: "CLOTH MARKET BRANCH KARACHI",
+    openingBal: "1,362,799.70",
+    runDate: "23-Feb-2026",
+  });
+
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
     setUblTransactions([]);
@@ -128,6 +147,7 @@ function App() {
     setMeezanTransactions([]);
     setMetroTransactions([]);
     setSonehriTransactions([]);
+    setDubaiTransactions([]);
     setHtmlContent("");
   };
 
@@ -144,6 +164,8 @@ function App() {
       setMetroTransactions(data as TransactionRow[]);
     } else if (selectedBank === "sonehri") {
       setSonehriTransactions(data as TransactionRow[]);
+    } else if (selectedBank === "dubai") {
+      setDubaiTransactions(data as TransactionRow[]);
     }
   };
 
@@ -167,6 +189,10 @@ function App() {
     setSonehriAccountInfo(info);
   };
 
+  const handleDubaiAccountInfoChange = (info: DubaiIslamicAccountInfo) => {
+    setDubaiAccountInfo(info);
+  };
+
   const handleGeneratePreview = () => {
     let html = "";
 
@@ -180,6 +206,8 @@ function App() {
       html = generateMetroHTML(metroTransactions, metroAccountInfo);
     } else if (selectedBank === "sonehri" && sonehriTransactions.length > 0) {
       html = generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
+    } else if (selectedBank === "dubai" && dubaiTransactions.length > 0) {
+      html = generateDubaiHTML(dubaiTransactions, dubaiAccountInfo);
     }
 
     if (html) {
@@ -216,7 +244,9 @@ function App() {
           ? meezanTransactions.length > 0
           : selectedBank === "metro"
             ? metroTransactions.length > 0
-            : sonehriTransactions.length > 0;
+            : selectedBank === "sonehri"
+              ? sonehriTransactions.length > 0
+              : dubaiTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -264,10 +294,15 @@ function App() {
                   accountInfo={metroAccountInfo}
                   onChange={handleMetroAccountInfoChange}
                 />
-              ) : (
+              ) : selectedBank === "sonehri" ? (
                 <SonehriAccountInfoForm
                   accountInfo={sonehriAccountInfo}
                   onChange={handleSonehriAccountInfoChange}
+                />
+              ) : (
+                <DubaiIslamicAccountInfoForm
+                  accountInfo={dubaiAccountInfo}
+                  onChange={handleDubaiAccountInfoChange}
                 />
               )}
 
