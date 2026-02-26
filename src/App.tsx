@@ -6,6 +6,7 @@ import { UBLAccountInfoForm } from "./components/UBLAccountInfoForm";
 import { FaisalAccountInfoForm } from "./components/FaisalAccountInfoForm";
 import { MeezanAccountInfoForm } from "./components/MeezanAccountInfoForm";
 import { MetroAccountInfoForm } from "./components/MetroAccountInfoForm";
+import { SonehriAccountInfoForm } from "./components/SonehriAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow,
@@ -14,12 +15,14 @@ import {
   FaisalAccountInfo,
   MeezanAccountInfo,
   MetroAccountInfo,
+  SonehriAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
-import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
+import { generateFaisalHTML } from "./utils/faisalHTMLGenerator";
 import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
 import { generateMetroHTML } from "./utils/metroHtmlGenerator";
+import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -32,6 +35,7 @@ function App() {
     TransactionRow[]
   >([]);
   const [metroTransactions, setMetroTransactions] = useState<TransactionRow[]>([]);
+  const [sonehriTransactions, setSonehriTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -101,12 +105,29 @@ function App() {
     },
   );
 
+  const [sonehriAccountInfo, setSonehriAccountInfo] = useState<SonehriAccountInfo>({
+    accountTitle: "A.R INDUSTRIES",
+    address: "PLOT NO L-18 BLOCK NO 22\nF. B AREA KARACHI",
+    address2: "KARACHI",
+    accountNo: "00123456789",
+    accountType: "PKR-Jari Account Customers",
+    iban: "PK00SONB0012345678901234",
+    oldNumber: "",
+    bankName: "SONERI BANK LIMITED",
+    currency: "PKR",
+    fromDate: "01 Oct 2025",
+    toDate: "31 Oct 2025",
+    branchName: "GULBERG BRANCH",
+    printedDateTime: "25 OCT 2025 10:32:7 ",
+  });
+
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
     setUblTransactions([]);
     setFaisalTransactions([]);
     setMeezanTransactions([]);
     setMetroTransactions([]);
+    setSonehriTransactions([]);
     setHtmlContent("");
   };
 
@@ -121,6 +142,8 @@ function App() {
       setMeezanTransactions(data as TransactionRow[]);
     } else if (selectedBank === "metro") {
       setMetroTransactions(data as TransactionRow[]);
+    } else if (selectedBank === "sonehri") {
+      setSonehriTransactions(data as TransactionRow[]);
     }
   };
 
@@ -140,6 +163,10 @@ function App() {
     setMetroAccountInfo(info);
   };
 
+  const handleSonehriAccountInfoChange = (info: SonehriAccountInfo) => {
+    setSonehriAccountInfo(info);
+  };
+
   const handleGeneratePreview = () => {
     let html = "";
 
@@ -151,6 +178,8 @@ function App() {
       html = generateMeezanHTML(meezanTransactions, meezanAccountInfo);
     } else if (selectedBank === "metro" && metroTransactions.length > 0) {
       html = generateMetroHTML(metroTransactions, metroAccountInfo);
+    } else if (selectedBank === "sonehri" && sonehriTransactions.length > 0) {
+      html = generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
     }
 
     if (html) {
@@ -185,7 +214,9 @@ function App() {
         ? faisalTransactions.length > 0
         : selectedBank === "meezan"
           ? meezanTransactions.length > 0
-          : metroTransactions.length > 0;
+          : selectedBank === "metro"
+            ? metroTransactions.length > 0
+            : sonehriTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -228,10 +259,15 @@ function App() {
                   accountInfo={meezanAccountInfo}
                   onChange={handleMeezanAccountInfoChange}
                 />
-              ) : (
+              ) : selectedBank === "metro" ? (
                 <MetroAccountInfoForm
                   accountInfo={metroAccountInfo}
                   onChange={handleMetroAccountInfoChange}
+                />
+              ) : (
+                <SonehriAccountInfoForm
+                  accountInfo={sonehriAccountInfo}
+                  onChange={handleSonehriAccountInfoChange}
                 />
               )}
 

@@ -4,6 +4,7 @@ import { parseExcelFile } from '../utils/excelParser';
 import { parseFaisalExcelFile } from '../utils/faisalExcelParser';
 import { parseMeezanExcelFile } from '../utils/meezanExcelParser';
 import { parseMetroExcelFile } from '../utils/metroExcelParser';
+import { parseSonehriExcelFile } from '../utils/sonehriExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -27,6 +28,9 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
         onDataLoaded(transactions);
       } else if (bankType === 'metro') {
         const transactions = await parseMetroExcelFile(file);
+        onDataLoaded(transactions);
+      } else if (bankType === 'sonehri') {
+        const transactions = await parseSonehriExcelFile(file);
         onDataLoaded(transactions);
       }
     } catch (error) {

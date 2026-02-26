@@ -1,4 +1,4 @@
-export type BankType = 'ubl' | 'faisal' | 'meezan' | 'metro';
+export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri";
 
 export interface TransactionRow {
   date: string;
@@ -83,4 +83,20 @@ export interface MeezanAccountInfo {
   toDate: string;
   generatedBy: string;
   openingBalance?: string;
+}
+
+export interface SonehriAccountInfo {
+  accountTitle: string;
+  address: string;
+  address2: string;
+  accountNo: string;
+  accountType: string;
+  iban: string;
+  oldNumber: string;
+  bankName: string;
+  currency: string;
+  fromDate: string;
+  toDate: string;
+  branchName: string;
+  printedDateTime: string;
 }
