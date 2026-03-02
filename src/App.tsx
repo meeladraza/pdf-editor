@@ -8,6 +8,7 @@ import { MeezanAccountInfoForm } from "./components/MeezanAccountInfoForm";
 import { MetroAccountInfoForm } from "./components/MetroAccountInfoForm";
 import { SonehriAccountInfoForm } from "./components/SonehriAccountInfoForm";
 import { DubaiIslamicAccountInfoForm } from "./components/DubaiIslamicAccountInfoForm";
+import { McbIslamicAccountInfoForm } from "./components/McbIslamicAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow,
@@ -18,6 +19,7 @@ import {
   MetroAccountInfo,
   SonehriAccountInfo,
   DubaiIslamicAccountInfo,
+  McbIslamicAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
@@ -26,6 +28,7 @@ import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
 import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
 import { generateDubaiHTML } from "./utils/dubaiHtmlGenerator";
+import { generateMcbIslamicHTML } from "./utils/mcbIslamicHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -40,6 +43,7 @@ function App() {
   const [metroTransactions, setMetroTransactions] = useState<TransactionRow[]>([]);
   const [sonehriTransactions, setSonehriTransactions] = useState<TransactionRow[]>([]);
   const [dubaiTransactions, setDubaiTransactions] = useState<TransactionRow[]>([]);
+  const [mcbTransactions, setMcbTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -140,6 +144,28 @@ function App() {
     runDate: "23-Feb-2026",
   });
 
+  const [mcbAccountInfo, setMcbAccountInfo] = useState<McbIslamicAccountInfo>({
+    fromDate: "16-FEB-2026",
+    toDate: "16-FEB-2026",
+    printDate: "February, 17,2026 09:10 AM",
+    branchCode: "126",
+    branchName: "MEDICINE MARKET BRANCH Karachi",
+    accountTitle: "SKF COLLECTION",
+    mailingAddress: "SECTOR 16/1 12D NORTH KARACHI",
+    address2: "INDUSTRIAL ARE KARACHI 03008266060",
+    mobileNo: "923118266060",
+    accountNo: "126100264968001",
+    iban: "PK29MCIB126100264968001",
+    currency: "PKR",
+    accountType: "MCB Islamic Hidayat Current",
+    accountOpenDate: "06-SEP-2018",
+    qrText: "PK29MCIB126100264968001",
+    qrSubText: "SKF COLLECTION - 0001",
+    openingBalance: "50,000.00",
+    amountInReverse: "0.00",
+    availableBalance: "50,000.00",
+  });
+
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
     setUblTransactions([]);
@@ -148,6 +174,7 @@ function App() {
     setMetroTransactions([]);
     setSonehriTransactions([]);
     setDubaiTransactions([]);
+    setMcbTransactions([]);
     setHtmlContent("");
   };
 
@@ -166,6 +193,8 @@ function App() {
       setSonehriTransactions(data as TransactionRow[]);
     } else if (selectedBank === "dubai") {
       setDubaiTransactions(data as TransactionRow[]);
+    } else if (selectedBank === "mcb") {
+      setMcbTransactions(data as TransactionRow[]);
     }
   };
 
@@ -193,6 +222,10 @@ function App() {
     setDubaiAccountInfo(info);
   };
 
+  const handleMcbAccountInfoChange = (info: McbIslamicAccountInfo) => {
+    setMcbAccountInfo(info);
+  };
+
   const handleGeneratePreview = () => {
     let html = "";
 
@@ -208,6 +241,8 @@ function App() {
       html = generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
     } else if (selectedBank === "dubai" && dubaiTransactions.length > 0) {
       html = generateDubaiHTML(dubaiTransactions, dubaiAccountInfo);
+    } else if (selectedBank === "mcb" && mcbTransactions.length > 0) {
+      html = generateMcbIslamicHTML(mcbTransactions, mcbAccountInfo);
     }
 
     if (html) {
@@ -246,7 +281,9 @@ function App() {
             ? metroTransactions.length > 0
             : selectedBank === "sonehri"
               ? sonehriTransactions.length > 0
-              : dubaiTransactions.length > 0;
+              : selectedBank === "dubai"
+                ? dubaiTransactions.length > 0
+                : mcbTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -299,10 +336,15 @@ function App() {
                   accountInfo={sonehriAccountInfo}
                   onChange={handleSonehriAccountInfoChange}
                 />
-              ) : (
+              ) : selectedBank === "dubai" ? (
                 <DubaiIslamicAccountInfoForm
                   accountInfo={dubaiAccountInfo}
                   onChange={handleDubaiAccountInfoChange}
+                />
+              ) : (
+                <McbIslamicAccountInfoForm
+                  accountInfo={mcbAccountInfo}
+                  onChange={handleMcbAccountInfoChange}
                 />
               )}
 

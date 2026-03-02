@@ -74,6 +74,16 @@ export const BankSelector = ({ selectedBank, onBankChange }: BankSelectorProps) 
           <div className="font-semibold">Dubai Islamic</div>
           <div className="text-xs mt-1 opacity-75">Dubai Islamic Bank</div>
         </button>
+        <button
+          onClick={() => onBankChange('mcb')}
+          className={`p-4 rounded-lg border-2 transition-all ${selectedBank === 'mcb'
+              ? 'border-blue-600 bg-blue-50 text-blue-700'
+              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+            }`}
+        >
+          <div className="font-semibold">MCB Islamic</div>
+          <div className="text-xs mt-1 opacity-75">MCB Islamic Bank</div>
+        </button>
       </div>
     </div>
   );
