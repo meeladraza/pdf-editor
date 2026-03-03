@@ -7,6 +7,7 @@ import { parseMetroExcelFile } from '../utils/metroExcelParser';
 import { parseSonehriExcelFile } from '../utils/sonehriExcelParser';
 import { parseDubaiExcelFile } from '../utils/dubaiExcelParser';
 import { parseMcbIslamicExcelFile } from '../utils/mcbIslamicExcelParser';
+import { parseBankAlHabibExcelFile } from '../utils/bankAlHabibExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -39,6 +40,9 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
         onDataLoaded(transactions);
       } else if (bankType === 'mcb') {
         const transactions = await parseMcbIslamicExcelFile(file);
+        onDataLoaded(transactions);
+      } else if (bankType === 'alhabib') {
+        const transactions = await parseBankAlHabibExcelFile(file);
         onDataLoaded(transactions);
       }
     } catch (error) {

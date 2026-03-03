@@ -9,6 +9,7 @@ import { MetroAccountInfoForm } from "./components/MetroAccountInfoForm";
 import { SonehriAccountInfoForm } from "./components/SonehriAccountInfoForm";
 import { DubaiIslamicAccountInfoForm } from "./components/DubaiIslamicAccountInfoForm";
 import { McbIslamicAccountInfoForm } from "./components/McbIslamicAccountInfoForm";
+import { BankAlHabibAccountInfoForm } from "./components/BankAlHabibAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow,
@@ -20,6 +21,7 @@ import {
   SonehriAccountInfo,
   DubaiIslamicAccountInfo,
   McbIslamicAccountInfo,
+  BankAlHabibAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
@@ -29,6 +31,7 @@ import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
 import { generateDubaiHTML } from "./utils/dubaiHtmlGenerator";
 import { generateMcbIslamicHTML } from "./utils/mcbIslamicHtmlGenerator";
+import { generateBankAlHabibHTML } from "./utils/bankAlHabibHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -44,6 +47,7 @@ function App() {
   const [sonehriTransactions, setSonehriTransactions] = useState<TransactionRow[]>([]);
   const [dubaiTransactions, setDubaiTransactions] = useState<TransactionRow[]>([]);
   const [mcbTransactions, setMcbTransactions] = useState<TransactionRow[]>([]);
+  const [alhabibTransactions, setAlhabibTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -166,6 +170,23 @@ function App() {
     availableBalance: "50,000.00",
   });
 
+  const [alhabibAccountInfo, setAlhabibAccountInfo] = useState<BankAlHabibAccountInfo>({
+    printDate: "22/10/2025",
+    branchCode: "1011",
+    branchName: "CLOTH MARKET BRANCH - 1011",
+    branchAddress: "NEW NEHAM ROAD, KARACHI, PAKISTAN",
+    fromDate: "20/10/2025",
+    toDate: "20/10/2025",
+    accountName: "A R INDUSTRIES",
+    address1: "PLT NO L-18 BLK # 22 FB AREA",
+    address2: "KARACHI - PAKISTAN",
+    accountNo: "1011-0981-XXXXXX-01-4",
+    accountType: "AL HABIB CURNT PLUS",
+    currency: "PAKISTANI RUPEES",
+    qrText: "1011-0981-XXXXXX-01-4",
+    qrSubText: "A R INDUSTRIES - 8701",
+  });
+
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
     setUblTransactions([]);
@@ -175,6 +196,7 @@ function App() {
     setSonehriTransactions([]);
     setDubaiTransactions([]);
     setMcbTransactions([]);
+    setAlhabibTransactions([]);
     setHtmlContent("");
   };
 
@@ -195,6 +217,8 @@ function App() {
       setDubaiTransactions(data as TransactionRow[]);
     } else if (selectedBank === "mcb") {
       setMcbTransactions(data as TransactionRow[]);
+    } else if (selectedBank === "alhabib") {
+      setAlhabibTransactions(data as TransactionRow[]);
     }
   };
 
@@ -226,6 +250,10 @@ function App() {
     setMcbAccountInfo(info);
   };
 
+  const handleAlhabibAccountInfoChange = (info: BankAlHabibAccountInfo) => {
+    setAlhabibAccountInfo(info);
+  };
+
   const handleGeneratePreview = () => {
     let html = "";
 
@@ -243,6 +271,8 @@ function App() {
       html = generateDubaiHTML(dubaiTransactions, dubaiAccountInfo);
     } else if (selectedBank === "mcb" && mcbTransactions.length > 0) {
       html = generateMcbIslamicHTML(mcbTransactions, mcbAccountInfo);
+    } else if (selectedBank === "alhabib" && alhabibTransactions.length > 0) {
+      html = generateBankAlHabibHTML(alhabibTransactions, alhabibAccountInfo);
     }
 
     if (html) {
@@ -283,7 +313,9 @@ function App() {
               ? sonehriTransactions.length > 0
               : selectedBank === "dubai"
                 ? dubaiTransactions.length > 0
-                : mcbTransactions.length > 0;
+                : selectedBank === "mcb"
+                  ? mcbTransactions.length > 0
+                  : alhabibTransactions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -341,10 +373,15 @@ function App() {
                   accountInfo={dubaiAccountInfo}
                   onChange={handleDubaiAccountInfoChange}
                 />
-              ) : (
+              ) : selectedBank === "mcb" ? (
                 <McbIslamicAccountInfoForm
                   accountInfo={mcbAccountInfo}
                   onChange={handleMcbAccountInfoChange}
+                />
+              ) : (
+                <BankAlHabibAccountInfoForm
+                  accountInfo={alhabibAccountInfo}
+                  onChange={handleAlhabibAccountInfoChange}
                 />
               )}
 
