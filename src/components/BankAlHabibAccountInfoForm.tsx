@@ -14,7 +14,7 @@ export const BankAlHabibAccountInfoForm = ({ accountInfo, onChange }: Props) => 
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
-    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6">
+    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6 mx-auto">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
         Bank AL Habib Account Information
       </h2>

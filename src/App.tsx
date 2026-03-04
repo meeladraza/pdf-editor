@@ -1,5 +1,8 @@
 import { useState } from "react";
-// import { FileText } from 'lucide-react';
+import {
+  FileText, Building2, FileSpreadsheet, Download,
+  Eye, CheckCircle2, ChevronRight,
+} from "lucide-react";
 import { FileUpload } from "./components/FileUpload";
 import { BankSelector } from "./components/BankSelector";
 import { UBLAccountInfoForm } from "./components/UBLAccountInfoForm";
@@ -10,47 +13,41 @@ import { SonehriAccountInfoForm } from "./components/SonehriAccountInfoForm";
 import { DubaiIslamicAccountInfoForm } from "./components/DubaiIslamicAccountInfoForm";
 import { McbIslamicAccountInfoForm } from "./components/McbIslamicAccountInfoForm";
 import { BankAlHabibAccountInfoForm } from "./components/BankAlHabibAccountInfoForm";
+import { BankAlFalahAccountInfoForm } from "./components/BankAlFalahAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
-  TransactionRow,
-  FaisalTransactionRow,
-  UBLAccountInfo,
-  FaisalAccountInfo,
-  MeezanAccountInfo,
-  MetroAccountInfo,
-  SonehriAccountInfo,
-  DubaiIslamicAccountInfo,
-  McbIslamicAccountInfo,
-  BankAlHabibAccountInfo,
+  TransactionRow, FaisalTransactionRow,
+  UBLAccountInfo, FaisalAccountInfo, MeezanAccountInfo,
+  MetroAccountInfo, SonehriAccountInfo, DubaiIslamicAccountInfo,
+  McbIslamicAccountInfo, BankAlHabibAccountInfo, BankAlFalahAccountInfo,
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
-import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
+import { generateFaisalHTML } from "./utils/faisalHTMLGenerator";
 import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
 import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
 import { generateDubaiHTML } from "./utils/dubaiHtmlGenerator";
 import { generateMcbIslamicHTML } from "./utils/mcbIslamicHtmlGenerator";
 import { generateBankAlHabibHTML } from "./utils/bankAlHabibHtmlGenerator";
+import { generateBankAlFalahHTML } from "./utils/bankAlFalahHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
   const [selectedBank, setSelectedBank] = useState<BankType>("ubl");
   const [ublTransactions, setUblTransactions] = useState<TransactionRow[]>([]);
-  const [faisalTransactions, setFaisalTransactions] = useState<
-    FaisalTransactionRow[]
-  >([]);
-  const [meezanTransactions, setMeezanTransactions] = useState<
-    TransactionRow[]
-  >([]);
+  const [faisalTransactions, setFaisalTransactions] = useState<FaisalTransactionRow[]>([]);
+  const [meezanTransactions, setMeezanTransactions] = useState<TransactionRow[]>([]);
   const [metroTransactions, setMetroTransactions] = useState<TransactionRow[]>([]);
   const [sonehriTransactions, setSonehriTransactions] = useState<TransactionRow[]>([]);
   const [dubaiTransactions, setDubaiTransactions] = useState<TransactionRow[]>([]);
   const [mcbTransactions, setMcbTransactions] = useState<TransactionRow[]>([]);
   const [alhabibTransactions, setAlhabibTransactions] = useState<TransactionRow[]>([]);
+  const [alfalahTransactions, setAlfalahTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
+  // ── Account info state ──────────────────────────────────────────────────────
   const [ublAccountInfo, setUblAccountInfo] = useState<UBLAccountInfo>({
     branchCode: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
     accountTitle: "AR INDUSTRIES",
@@ -69,20 +66,18 @@ function App() {
     asOf: "13-OCT-2025",
   });
 
-  const [faisalAccountInfo, setFaisalAccountInfo] = useState<FaisalAccountInfo>(
-    {
-      accountNo: "0134007000004420",
-      accountTitle: "A R INDUSTRIES",
-      address: "PLOT NO.L-18 BLOCK NO.22",
-      address2: "F.B AREA KARACHI",
-      phoneNo: "03219216849",
-      depositType: "CURRENT",
-      currency: "PKR",
-      statementPeriodFrom: "20-10-2025",
-      statementPeriodTo: "20-10-2025",
-      statementDate: "22-10-2025 13:40:49",
-    },
-  );
+  const [faisalAccountInfo, setFaisalAccountInfo] = useState<FaisalAccountInfo>({
+    accountNo: "0134007000004420",
+    accountTitle: "A R INDUSTRIES",
+    address: "PLOT NO.L-18 BLOCK NO.22",
+    address2: "F.B AREA KARACHI",
+    phoneNo: "03219216849",
+    depositType: "CURRENT",
+    currency: "PKR",
+    statementPeriodFrom: "20-10-2025",
+    statementPeriodTo: "20-10-2025",
+    statementDate: "22-10-2025 13:40:49",
+  });
 
   const [metroAccountInfo, setMetroAccountInfo] = useState<MetroAccountInfo>({
     accountTitle: "S.K.F. COLLECTION",
@@ -97,25 +92,22 @@ function App() {
     printedOn: "27-Sep-2021",
   });
 
-  const [meezanAccountInfo, setMeezanAccountInfo] = useState<MeezanAccountInfo>(
-    {
-      branchName: "9937-NADIR HOUSE II-KARACHI",
-      accountTitle: "AR INDUSTRIES",
-      address: "PLOT NO. L-18, BLOCK 22, FEDERAL",
-      address2:
-        "'B' AREA, KARACHI CENTRAL GULBERG-TOWN, KARACHI (0321-9216849)",
-      printDate: "22 OCT 2025 14:20:09",
-      iban: "PK13MEZN0099370104122724",
-      oldAccountNo: "",
-      accountNo: "0104122724",
-      product: "Meezan Rupee Current A/c",
-      currency: "Pakistan Rupee",
-      fromDate: "20 OCT 2025",
-      toDate: "20 OCT 2025",
-      generatedBy: "BAREERA.37233",
-      openingBalance: "12642549.36",
-    },
-  );
+  const [meezanAccountInfo, setMeezanAccountInfo] = useState<MeezanAccountInfo>({
+    branchName: "9937-NADIR HOUSE II-KARACHI",
+    accountTitle: "AR INDUSTRIES",
+    address: "PLOT NO. L-18, BLOCK 22, FEDERAL",
+    address2: "'B' AREA, KARACHI CENTRAL GULBERG-TOWN, KARACHI (0321-9216849)",
+    printDate: "22 OCT 2025 14:20:09",
+    iban: "PK13MEZN0099370104122724",
+    oldAccountNo: "",
+    accountNo: "0104122724",
+    product: "Meezan Rupee Current A/c",
+    currency: "Pakistan Rupee",
+    fromDate: "20 OCT 2025",
+    toDate: "20 OCT 2025",
+    generatedBy: "BAREERA.37233",
+    openingBalance: "12642549.36",
+  });
 
   const [sonehriAccountInfo, setSonehriAccountInfo] = useState<SonehriAccountInfo>({
     accountTitle: "A.R INDUSTRIES",
@@ -170,6 +162,15 @@ function App() {
     availableBalance: "50,000.00",
   });
 
+  const [alfalahAccountInfo, setAlfalahAccountInfo] = useState<BankAlFalahAccountInfo>({
+    printDateTime: "10/22/25, 3:53 PM",
+    stmtText: "STMT.ENT.BOOK.3.BR",
+    openingBalance: "315.44",
+    accountNo: "1009345774",
+    iban: "PK0010001",
+    bookingDate: "20",
+  });
+
   const [alhabibAccountInfo, setAlhabibAccountInfo] = useState<BankAlHabibAccountInfo>({
     printDate: "22/10/2025",
     branchCode: "1011",
@@ -187,6 +188,7 @@ function App() {
     qrSubText: "A R INDUSTRIES - 8701",
   });
 
+  // ── Handlers ────────────────────────────────────────────────────────────────
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
     setUblTransactions([]);
@@ -197,211 +199,226 @@ function App() {
     setDubaiTransactions([]);
     setMcbTransactions([]);
     setAlhabibTransactions([]);
+    setAlfalahTransactions([]);
     setHtmlContent("");
   };
 
-  const handleDataLoaded = (
-    data: TransactionRow[] | FaisalTransactionRow[],
-  ) => {
-    if (selectedBank === "ubl") {
-      setUblTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "faisal") {
-      setFaisalTransactions(data as FaisalTransactionRow[]);
-    } else if (selectedBank === "meezan") {
-      setMeezanTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "metro") {
-      setMetroTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "sonehri") {
-      setSonehriTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "dubai") {
-      setDubaiTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "mcb") {
-      setMcbTransactions(data as TransactionRow[]);
-    } else if (selectedBank === "alhabib") {
-      setAlhabibTransactions(data as TransactionRow[]);
-    }
-  };
-
-  const handleUBLAccountInfoChange = (info: UBLAccountInfo) => {
-    setUblAccountInfo(info);
-  };
-
-  const handleFaisalAccountInfoChange = (info: FaisalAccountInfo) => {
-    setFaisalAccountInfo(info);
-  };
-
-  const handleMeezanAccountInfoChange = (info: MeezanAccountInfo) => {
-    setMeezanAccountInfo(info);
-  };
-
-  const handleMetroAccountInfoChange = (info: MetroAccountInfo) => {
-    setMetroAccountInfo(info);
-  };
-
-  const handleSonehriAccountInfoChange = (info: SonehriAccountInfo) => {
-    setSonehriAccountInfo(info);
-  };
-
-  const handleDubaiAccountInfoChange = (info: DubaiIslamicAccountInfo) => {
-    setDubaiAccountInfo(info);
-  };
-
-  const handleMcbAccountInfoChange = (info: McbIslamicAccountInfo) => {
-    setMcbAccountInfo(info);
-  };
-
-  const handleAlhabibAccountInfoChange = (info: BankAlHabibAccountInfo) => {
-    setAlhabibAccountInfo(info);
+  const handleDataLoaded = (data: TransactionRow[] | FaisalTransactionRow[]) => {
+    if (selectedBank === "ubl")          setUblTransactions(data as TransactionRow[]);
+    else if (selectedBank === "faisal")  setFaisalTransactions(data as FaisalTransactionRow[]);
+    else if (selectedBank === "meezan")  setMeezanTransactions(data as TransactionRow[]);
+    else if (selectedBank === "metro")   setMetroTransactions(data as TransactionRow[]);
+    else if (selectedBank === "sonehri") setSonehriTransactions(data as TransactionRow[]);
+    else if (selectedBank === "dubai")   setDubaiTransactions(data as TransactionRow[]);
+    else if (selectedBank === "mcb")     setMcbTransactions(data as TransactionRow[]);
+    else if (selectedBank === "alhabib") setAlhabibTransactions(data as TransactionRow[]);
+    else if (selectedBank === "alfalah") setAlfalahTransactions(data as TransactionRow[]);
   };
 
   const handleGeneratePreview = () => {
     let html = "";
-
-    if (selectedBank === "ubl" && ublTransactions.length > 0) {
+    if (selectedBank === "ubl" && ublTransactions.length > 0)
       html = generateUBLHTML(ublTransactions, ublAccountInfo);
-    } else if (selectedBank === "faisal" && faisalTransactions.length > 0) {
+    else if (selectedBank === "faisal" && faisalTransactions.length > 0)
       html = generateFaisalHTML(faisalTransactions, faisalAccountInfo);
-    } else if (selectedBank === "meezan" && meezanTransactions.length > 0) {
+    else if (selectedBank === "meezan" && meezanTransactions.length > 0)
       html = generateMeezanHTML(meezanTransactions, meezanAccountInfo);
-    } else if (selectedBank === "metro" && metroTransactions.length > 0) {
+    else if (selectedBank === "metro" && metroTransactions.length > 0)
       html = generateMetroHTML(metroTransactions, metroAccountInfo);
-    } else if (selectedBank === "sonehri" && sonehriTransactions.length > 0) {
+    else if (selectedBank === "sonehri" && sonehriTransactions.length > 0)
       html = generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
-    } else if (selectedBank === "dubai" && dubaiTransactions.length > 0) {
+    else if (selectedBank === "dubai" && dubaiTransactions.length > 0)
       html = generateDubaiHTML(dubaiTransactions, dubaiAccountInfo);
-    } else if (selectedBank === "mcb" && mcbTransactions.length > 0) {
+    else if (selectedBank === "mcb" && mcbTransactions.length > 0)
       html = generateMcbIslamicHTML(mcbTransactions, mcbAccountInfo);
-    } else if (selectedBank === "alhabib" && alhabibTransactions.length > 0) {
+    else if (selectedBank === "alhabib" && alhabibTransactions.length > 0)
       html = generateBankAlHabibHTML(alhabibTransactions, alhabibAccountInfo);
-    }
+    else if (selectedBank === "alfalah" && alfalahTransactions.length > 0)
+      html = generateBankAlFalahHTML(alfalahTransactions, alfalahAccountInfo);
 
-    if (html) {
-      setHtmlContent(html);
-      setIsModalOpen(true);
-    } else {
-      alert("Please upload an Excel file first");
-    }
+    if (html) { setHtmlContent(html); setIsModalOpen(true); }
+    else alert("Please upload an Excel file first");
   };
 
   const handleDownloadPDF = async () => {
-    if (!htmlContent) {
-      alert("Please generate preview first");
-      return;
-    }
-
-    try {
-      const pdfData = await generatePDF(htmlContent);
-      const filename = `${selectedBank}-bank-statement.pdf`;
-      downloadPDF(pdfData, filename);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF. Please try again.");
-      throw error;
-    }
+    const pdfData = await generatePDF(htmlContent);
+    downloadPDF(pdfData, `${selectedBank}-bank-statement.pdf`);
   };
 
   const hasTransactions =
-    selectedBank === "ubl"
-      ? ublTransactions.length > 0
-      : selectedBank === "faisal"
-        ? faisalTransactions.length > 0
-        : selectedBank === "meezan"
-          ? meezanTransactions.length > 0
-          : selectedBank === "metro"
-            ? metroTransactions.length > 0
-            : selectedBank === "sonehri"
-              ? sonehriTransactions.length > 0
-              : selectedBank === "dubai"
-                ? dubaiTransactions.length > 0
-                : selectedBank === "mcb"
-                  ? mcbTransactions.length > 0
-                  : alhabibTransactions.length > 0;
+    selectedBank === "ubl"     ? ublTransactions.length > 0 :
+    selectedBank === "faisal"  ? faisalTransactions.length > 0 :
+    selectedBank === "meezan"  ? meezanTransactions.length > 0 :
+    selectedBank === "metro"   ? metroTransactions.length > 0 :
+    selectedBank === "sonehri" ? sonehriTransactions.length > 0 :
+    selectedBank === "dubai"   ? dubaiTransactions.length > 0 :
+    selectedBank === "mcb"     ? mcbTransactions.length > 0 :
+    selectedBank === "alhabib" ? alhabibTransactions.length > 0 :
+                                 alfalahTransactions.length > 0;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            {/* <FileText className="w-12 h-12 text-blue-600 mr-3" /> */}
-            <h1 className="text-4xl font-bold text-gray-800">
-              Bank Statement Generator
-            </h1>
+    <div className="h-screen flex overflow-hidden bg-slate-50">
+
+      {/* ══ LEFT SIDEBAR ════════════════════════════════════════════════════ */}
+      <aside className="w-72 min-w-[288px] bg-white border-r border-slate-200 shadow-md flex flex-col z-10 overflow-y-auto">
+
+        {/* Header */}
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 px-5 py-5 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white font-bold text-sm leading-tight">Statement Generator</h1>
+              <p className="text-blue-200 text-[11px] mt-0.5">Bank PDF Generator</p>
+            </div>
           </div>
-          <p className="text-gray-600">
-            Select your bank, upload Excel file, and generate professional PDF
-            bank statements
-          </p>
         </div>
 
-        <div className="flex flex-col items-center gap-6">
-          <BankSelector
-            selectedBank={selectedBank}
-            onBankChange={handleBankChange}
-          />
+        {/* Steps */}
+        <div className="flex-1 px-4 py-5 flex flex-col gap-5">
 
-          <FileUpload onDataLoaded={handleDataLoaded} bankType={selectedBank} />
+          {/* Step 1 — Select Bank */}
+          <div>
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                <span className="text-white text-[10px] font-bold">1</span>
+              </div>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Select Bank</span>
+            </div>
+            <BankSelector selectedBank={selectedBank} onBankChange={handleBankChange} />
+          </div>
 
+          <div className="border-t border-slate-100" />
+
+          {/* Step 2 — Upload Excel */}
+          <div>
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${hasTransactions ? "bg-green-500" : "bg-slate-300"}`}>
+                {hasTransactions
+                  ? <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  : <span className="text-white text-[10px] font-bold">2</span>}
+              </div>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Upload Excel</span>
+            </div>
+            {/* key prop remounts FileUpload on bank change, resetting filename display */}
+            <FileUpload key={selectedBank} onDataLoaded={handleDataLoaded} bankType={selectedBank} />
+          </div>
+
+          {/* Step 3 — Generate (shown only after upload) */}
           {hasTransactions && (
             <>
-              {selectedBank === "ubl" ? (
-                <UBLAccountInfoForm
-                  accountInfo={ublAccountInfo}
-                  onChange={handleUBLAccountInfoChange}
-                />
-              ) : selectedBank === "faisal" ? (
-                <FaisalAccountInfoForm
-                  accountInfo={faisalAccountInfo}
-                  onChange={handleFaisalAccountInfoChange}
-                />
-              ) : selectedBank === "meezan" ? (
-                <MeezanAccountInfoForm
-                  accountInfo={meezanAccountInfo}
-                  onChange={handleMeezanAccountInfoChange}
-                />
-              ) : selectedBank === "metro" ? (
-                <MetroAccountInfoForm
-                  accountInfo={metroAccountInfo}
-                  onChange={handleMetroAccountInfoChange}
-                />
-              ) : selectedBank === "sonehri" ? (
-                <SonehriAccountInfoForm
-                  accountInfo={sonehriAccountInfo}
-                  onChange={handleSonehriAccountInfoChange}
-                />
-              ) : selectedBank === "dubai" ? (
-                <DubaiIslamicAccountInfoForm
-                  accountInfo={dubaiAccountInfo}
-                  onChange={handleDubaiAccountInfoChange}
-                />
-              ) : selectedBank === "mcb" ? (
-                <McbIslamicAccountInfoForm
-                  accountInfo={mcbAccountInfo}
-                  onChange={handleMcbAccountInfoChange}
-                />
-              ) : (
-                <BankAlHabibAccountInfoForm
-                  accountInfo={alhabibAccountInfo}
-                  onChange={handleAlhabibAccountInfoChange}
-                />
-              )}
-
-              <button
-                onClick={handleGeneratePreview}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md text-lg"
-              >
-                Generate Preview
-              </button>
+              <div className="border-t border-slate-100" />
+              <div>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+                    <span className="text-white text-[10px] font-bold">3</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Generate PDF</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                  Edit account details on the right, then click generate.
+                </p>
+                <button
+                  onClick={handleGeneratePreview}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md active:scale-95"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview &amp; Download
+                </button>
+              </div>
             </>
           )}
         </div>
 
-        <PreviewModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          htmlContent={htmlContent}
-          onDownloadPDF={handleDownloadPDF}
-        />
-      </div>
+        {/* Sidebar footer */}
+        <div className="px-4 py-3 border-t border-slate-100 shrink-0">
+          <p className="text-[10px] text-slate-400 text-center">9 bank templates · A4 PDF export</p>
+        </div>
+      </aside>
+
+      {/* ══ MAIN CONTENT ════════════════════════════════════════════════════ */}
+      <main className="flex-1 overflow-y-auto flex flex-col">
+
+        {hasTransactions ? (
+
+          /* Account info form */
+          <div className="p-6 container mx-auto">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-800">Account Information</h2>
+                <p className="text-xs text-slate-500">
+                  Edit the fields below, then click <strong>Preview &amp; Download</strong> in the left panel.
+                </p>
+              </div>
+            </div>
+
+            {selectedBank === "ubl" ? (
+              <UBLAccountInfoForm accountInfo={ublAccountInfo} onChange={setUblAccountInfo} />
+            ) : selectedBank === "faisal" ? (
+              <FaisalAccountInfoForm accountInfo={faisalAccountInfo} onChange={setFaisalAccountInfo} />
+            ) : selectedBank === "meezan" ? (
+              <MeezanAccountInfoForm accountInfo={meezanAccountInfo} onChange={setMeezanAccountInfo} />
+            ) : selectedBank === "metro" ? (
+              <MetroAccountInfoForm accountInfo={metroAccountInfo} onChange={setMetroAccountInfo} />
+            ) : selectedBank === "sonehri" ? (
+              <SonehriAccountInfoForm accountInfo={sonehriAccountInfo} onChange={setSonehriAccountInfo} />
+            ) : selectedBank === "dubai" ? (
+              <DubaiIslamicAccountInfoForm accountInfo={dubaiAccountInfo} onChange={setDubaiAccountInfo} />
+            ) : selectedBank === "mcb" ? (
+              <McbIslamicAccountInfoForm accountInfo={mcbAccountInfo} onChange={setMcbAccountInfo} />
+            ) : selectedBank === "alhabib" ? (
+              <BankAlHabibAccountInfoForm accountInfo={alhabibAccountInfo} onChange={setAlhabibAccountInfo} />
+            ) : (
+              <BankAlFalahAccountInfoForm accountInfo={alfalahAccountInfo} onChange={setAlfalahAccountInfo} />
+            )}
+          </div>
+
+        ) : (
+
+          /* Empty state */
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="text-center max-w-sm">
+              <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+                <FileSpreadsheet className="w-10 h-10 text-blue-400" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-700 mb-2">Ready to Generate</h2>
+              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                Select a bank from the left panel and upload your Excel file to customize and generate the PDF statement.
+              </p>
+              <div className="space-y-2.5 text-left">
+                {([
+                  { Icon: Building2,       color: "blue",   title: "9 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
+                  { Icon: FileSpreadsheet, color: "green",  title: "Excel Import",     sub: "Upload .xlsx or .xls files" },
+                  { Icon: Download,        color: "purple", title: "PDF Export",       sub: "Professional A4 bank statements" },
+                ] as const).map(({ Icon, color, title, sub }) => (
+                  <div key={title} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-${color}-100`}>
+                      <Icon className={`w-4 h-4 text-${color}-600`} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-700">{title}</div>
+                      <div className="text-xs text-slate-400">{sub}</div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300 ml-auto shrink-0" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <PreviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        htmlContent={htmlContent}
+        onDownloadPDF={handleDownloadPDF}
+      />
     </div>
   );
 }

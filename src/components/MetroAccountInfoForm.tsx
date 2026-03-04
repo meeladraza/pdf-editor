@@ -13,7 +13,7 @@ export const MetroAccountInfoForm = ({ accountInfo, onChange }: MetroAccountInfo
   const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
 
   return (
-    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6">
+    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6 mx-auto">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Habib Metro Bank Account Information</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">

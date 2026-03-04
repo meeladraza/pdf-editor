@@ -14,7 +14,7 @@ export const SonehriAccountInfoForm = ({
     };
 
     return (
-        <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6">
+        <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6 mx-auto">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
                 Sonehri Bank Account Information
             </h2>

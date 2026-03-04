@@ -1,5 +1,5 @@
-// import { X, Download } from 'lucide-react';
 import { useState } from 'react';
+import { X, Download, FileText, Loader2, Printer } from 'lucide-react';
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -23,43 +23,85 @@ export const PreviewModal = ({ isOpen, onClose, htmlContent, onDownloadPDF }: Pr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-800">Statement Preview</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Close"
-          >
-            {/* <X className="w-6 h-6 text-gray-600" /> */}
-            CLOSE
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex bg-slate-100">
 
-        <div className="flex-1 overflow-auto p-6">
-          <div className="bg-white rounded-lg shadow-sm">
-            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      {/* ── Preview area ─────────────────────────────────────── */}
+      <div className="flex-1 overflow-auto p-5">
+        <div
+          className="bg-white rounded-xl shadow-xl mx-auto"
+          style={{ maxWidth: 1200 }}
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
+      </div>
+
+      {/* ── Right action panel ───────────────────────────────── */}
+      <aside className="w-64 min-w-[256px] bg-white border-l border-slate-200 flex flex-col shadow-xl">
+
+        {/* Panel header */}
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 px-5 py-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 bg-white/15 hover:bg-white/25 rounded-lg flex items-center justify-center transition-colors"
+              title="Close"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
           </div>
+          <h2 className="text-white font-bold text-sm">Statement Ready</h2>
+          <p className="text-blue-200 text-xs mt-0.5">Review and download your PDF</p>
         </div>
 
-        <div className="p-6 border-t bg-white flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-          >
-            Close
-          </button>
+        {/* Actions */}
+        <div className="flex-1 p-4 flex flex-col gap-3">
+
+          {/* Info card */}
+          <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Printer className="w-3.5 h-3.5 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold text-slate-700">Print-ready PDF</div>
+                <div className="text-[10px] text-slate-400">A4 · Professional format</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Download button */}
           <button
             onClick={handleDownload}
             disabled={isGenerating}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-md"
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {/* <Download className="w-5 h-5" /> */}
-            {isGenerating ? 'Generating PDF...' : 'Download PDF'}
+            {isGenerating ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</>
+            ) : (
+              <><Download className="w-4 h-4" /> Download PDF</>
+            )}
           </button>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl font-medium text-sm hover:bg-slate-50 transition-colors"
+          >
+            Close Preview
+          </button>
+
         </div>
-      </div>
+
+        {/* Panel footer hint */}
+        <div className="px-4 pb-4 pt-2 border-t border-slate-100">
+          <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+            Scroll the left panel to review all pages before downloading.
+          </p>
+        </div>
+
+      </aside>
     </div>
   );
 };

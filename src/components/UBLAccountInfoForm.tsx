@@ -11,7 +11,7 @@ export const UBLAccountInfoForm = ({ accountInfo, onChange }: UBLAccountInfoForm
   };
 
   return (
-    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6">
+    <div className="w-full max-w-4xl bg-white rounded-lg shadow-sm p-6 mx-auto">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">UBL Account Information</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

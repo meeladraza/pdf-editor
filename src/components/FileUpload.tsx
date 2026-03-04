@@ -1,4 +1,5 @@
-// import { Upload } from 'lucide-react';
+import { useState } from 'react';
+import { Upload, CheckCircle2, FileSpreadsheet } from 'lucide-react';
 import { TransactionRow, FaisalTransactionRow, BankType } from '../types';
 import { parseExcelFile } from '../utils/excelParser';
 import { parseFaisalExcelFile } from '../utils/faisalExcelParser';
@@ -8,6 +9,7 @@ import { parseSonehriExcelFile } from '../utils/sonehriExcelParser';
 import { parseDubaiExcelFile } from '../utils/dubaiExcelParser';
 import { parseMcbIslamicExcelFile } from '../utils/mcbIslamicExcelParser';
 import { parseBankAlHabibExcelFile } from '../utils/bankAlHabibExcelParser';
+import { parseBankAlFalahExcelFile } from '../utils/bankAlFalahExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -15,63 +17,96 @@ interface FileUploadProps {
 }
 
 export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
+  const processFile = async (file: File) => {
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      alert('Please upload an Excel file (.xlsx or .xls)');
+      return;
+    }
+    setIsLoading(true);
     try {
-      if (bankType === 'ubl') {
-        const transactions = await parseExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'faisal') {
-        const transactions = await parseFaisalExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'meezan') {
-        const transactions = await parseMeezanExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'metro') {
-        const transactions = await parseMetroExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'sonehri') {
-        const transactions = await parseSonehriExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'dubai') {
-        const transactions = await parseDubaiExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'mcb') {
-        const transactions = await parseMcbIslamicExcelFile(file);
-        onDataLoaded(transactions);
-      } else if (bankType === 'alhabib') {
-        const transactions = await parseBankAlHabibExcelFile(file);
-        onDataLoaded(transactions);
-      }
+      let transactions: TransactionRow[] | FaisalTransactionRow[];
+      if (bankType === 'ubl')          transactions = await parseExcelFile(file);
+      else if (bankType === 'faisal')  transactions = await parseFaisalExcelFile(file);
+      else if (bankType === 'meezan')  transactions = await parseMeezanExcelFile(file);
+      else if (bankType === 'metro')   transactions = await parseMetroExcelFile(file);
+      else if (bankType === 'sonehri') transactions = await parseSonehriExcelFile(file);
+      else if (bankType === 'dubai')   transactions = await parseDubaiExcelFile(file);
+      else if (bankType === 'mcb')     transactions = await parseMcbIslamicExcelFile(file);
+      else if (bankType === 'alhabib') transactions = await parseBankAlHabibExcelFile(file);
+      else                             transactions = await parseBankAlFalahExcelFile(file);
+
+      setUploadedFileName(file.name);
+      onDataLoaded(transactions);
     } catch (error) {
       console.error('Error parsing Excel file:', error);
       alert('Failed to parse Excel file. Please check the file format.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = () => setIsDragging(false);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  };
+
   return (
-    <div className="w-full max-w-md">
-      <label
-        htmlFor="file-upload"
-        className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-          {/* <Upload className="w-10 h-10 mb-3 text-gray-400" /> */}
-          <p className="mb-2 text-sm text-gray-500">
-            <span className="font-semibold">Click to upload</span> or drag and drop
-          </p>
-          <p className="text-xs text-gray-500">Excel file (.xlsx, .xls)</p>
+    <label
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`flex flex-col items-center justify-center w-full h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all select-none ${
+        isLoading
+          ? 'border-blue-300 bg-blue-50 cursor-wait'
+          : isDragging
+            ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-md'
+            : uploadedFileName
+              ? 'border-green-400 bg-green-50 hover:bg-green-100'
+              : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/60'
+      }`}
+    >
+      {isLoading ? (
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-blue-600 font-medium">Parsing file…</span>
         </div>
-        <input
-          id="file-upload"
-          type="file"
-          className="hidden"
-          accept=".xlsx,.xls"
-          onChange={handleFileChange}
-        />
-      </label>
-    </div>
+      ) : uploadedFileName ? (
+        <div className="flex flex-col items-center gap-1 px-3 text-center">
+          <CheckCircle2 className="w-6 h-6 text-green-500" />
+          <span className="text-xs text-green-700 font-semibold truncate max-w-[210px]">{uploadedFileName}</span>
+          <span className="text-[10px] text-green-500">Click to replace</span>
+        </div>
+      ) : isDragging ? (
+        <div className="flex flex-col items-center gap-1">
+          <FileSpreadsheet className="w-7 h-7 text-blue-500" />
+          <span className="text-xs text-blue-600 font-semibold">Drop to upload</span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-1.5">
+          <Upload className="w-6 h-6 text-slate-400" />
+          <span className="text-xs text-slate-600 font-medium">Drop file or <span className="text-blue-600 underline">browse</span></span>
+          <span className="text-[10px] text-slate-400">.xlsx · .xls</span>
+        </div>
+      )}
+      <input
+        type="file"
+        className="hidden"
+        accept=".xlsx,.xls"
+        onChange={handleFileChange}
+      />
+    </label>
   );
 };
