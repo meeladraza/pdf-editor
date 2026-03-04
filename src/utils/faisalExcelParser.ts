@@ -25,8 +25,25 @@ export const parseFaisalExcelFile = (
 
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-          const narrationRaw = row[2] ? String(row[2]) : "";
-          const isOpeningBal = narrationRaw.toLowerCase().includes("opening balance");
+
+          // Scan every cell — "opening balance" may be in any column depending on the file
+          const isOpeningBal = row.some(
+            (cell: unknown) =>
+              cell != null &&
+              String(cell).toLowerCase().includes("opening balance"),
+          );
+
+          // Narration: prefer column 2, but if it's empty look for the cell that holds
+          // the opening-balance text (covers column-shifted Excel layouts)
+          const narrationRaw = isOpeningBal
+            ? (row.find(
+                (cell: unknown) =>
+                  cell != null &&
+                  String(cell).toLowerCase().includes("opening balance"),
+              ) as string) || ""
+            : row[2]
+              ? String(row[2])
+              : "";
 
           // Skip truly empty rows, but keep opening balance rows even if postingDate is absent
           if (!row[0] && !isOpeningBal) continue;

@@ -182,7 +182,7 @@ const toShortDate = (dateStr: string): string => {
 const generateTransactionRow = (tx: FaisalTransactionRow) => {
   if (tx.isOpeningBalance) {
     const label =
-      tx.narration || `Opening Balance as of ${toShortDate(tx.postingDate)}`;
+      `Opening Balance as of ${toShortDate(tx.postingDate)}`;
     return `
       <tr>
       <td colspan="2" style="${TD}"></td>
@@ -287,7 +287,7 @@ const generatePageContent = (
   pageNum: number,
   totalPages: number,
 ) => `
-  <div style="page-break-before:${isFirstPage ? "auto" : "always"}; min-height:100vh;">
+  <div class="fsl-page" style="page-break-before:${isFirstPage ? "auto" : "always"}; page-break-after:always;">
     ${generatePageHeader(accountInfo, pageNum, totalPages)}
     ${isFirstPage ? generateAccountInfo(accountInfo) : ""}
     <div style="padding:0 10px;">
@@ -332,6 +332,9 @@ export const generateFaisalHTML = (
       thead { display: table-header-group; }
       tfoot { display: table-footer-group; }
       tr { page-break-inside: avoid; }
+    }
+    @media screen {
+      .fsl-page { border-bottom: 3px solid #bbb; margin-bottom: 4px; padding-bottom: 20px; }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background: #fff; }
