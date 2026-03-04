@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText, Building2, FileSpreadsheet, Download,
-  Eye, CheckCircle2, ChevronRight,
+  Eye, CheckCircle2, ChevronRight, LogOut,
 } from "lucide-react";
+import { useAuth } from "./context/AuthContext";
 import { FileUpload } from "./components/FileUpload";
 import { BankSelector } from "./components/BankSelector";
 import { UBLAccountInfoForm } from "./components/UBLAccountInfoForm";
@@ -34,6 +36,14 @@ import { generateBankAlFalahHTML } from "./utils/bankAlFalahHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   const [selectedBank, setSelectedBank] = useState<BankType>("ubl");
   const [ublTransactions, setUblTransactions] = useState<TransactionRow[]>([]);
   const [faisalTransactions, setFaisalTransactions] = useState<FaisalTransactionRow[]>([]);
@@ -269,10 +279,17 @@ function App() {
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5 text-white" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h1 className="text-white font-bold text-sm leading-tight">Statement Generator</h1>
               <p className="text-blue-200 text-[11px] mt-0.5">Bank PDF Generator</p>
             </div>
+            <button
+              onClick={handleLogout}
+              title="Sign out"
+              className="w-8 h-8 bg-white/10 hover:bg-white/25 rounded-lg flex items-center justify-center transition-colors shrink-0"
+            >
+              <LogOut className="w-4 h-4 text-white" />
+            </button>
           </div>
         </div>
 
