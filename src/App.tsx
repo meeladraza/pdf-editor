@@ -23,7 +23,7 @@ import {
   BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
-import { generateFaisalHTML } from "./utils/faisalHTMLGenerator";
+import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
 import { generateMeezanHTML } from "./utils/MeezanHtmlGenerator";
 import { generateMetroHTML } from "./utils/metroHtmlGenerator";
 import { generateSonehriHTML } from "./utils/sonehriHtmlGenerator";
