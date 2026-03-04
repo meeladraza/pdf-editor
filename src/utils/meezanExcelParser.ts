@@ -2,6 +2,30 @@ import * as XLSX from 'xlsx';
 import { TransactionRow } from '../types';
 import { formatDate } from './formatDate';
 
+// ── Doc No extraction from Particulars ────────────────────────────────────────
+// Priority order:
+//   1. PO identifier  e.g. "Instrument Issuance. PO.0110.4478589 …"   → PO.0110.4478589
+//   2. STAN number    e.g. "… STAN (783639)"                          → 783639
+//   3. CR number      e.g. "Transfer Online CR 66096331 (REF# …)"     → 66096331
+//   4. Otherwise      e.g. "Outward Clearing Cheque (REF# 478156)"    → ""
+const extractDocNo = (particulars: string): string => {
+  if (!particulars) return '';
+
+  // 1. PO. identifier (non-whitespace chars after "PO.")
+  const poMatch = particulars.match(/\bPO\.\S+/i);
+  if (poMatch) return poMatch[0];
+
+  // 2. STAN (number)
+  const stanMatch = particulars.match(/\bSTAN\s*\((\d+)\)/i);
+  if (stanMatch) return stanMatch[1];
+
+  // 3. CR followed by digits
+  const crMatch = particulars.match(/\bCR\s+(\d+)/);
+  if (crMatch) return crMatch[1];
+
+  return '';
+};
+
 export const parseMeezanExcelFile = (
   file: File
 ): Promise<TransactionRow[]> => {
@@ -27,14 +51,16 @@ export const parseMeezanExcelFile = (
           const row = jsonData[i];
           if (!row[0]) continue;
 
+          // Columns: Date | Value Date | Particulars | Debit | Credit | Balance
+          const particularsRaw = row[2] ? String(row[2]) : '';
           const transaction: TransactionRow = {
             date: formatDate(row[0]),
             valueDate: formatDate(row[1]),
-            docNo: row[2] ? String(row[2]) : '',
-            particulars: row[3] ? String(row[3]) : '',
-            debit: row[4] ? String(row[4]) : '',
-            credit: row[5] ? String(row[5]) : '',
-            balance: row[6] ? String(row[6]) : '',
+            docNo: extractDocNo(particularsRaw),
+            particulars: particularsRaw,
+            debit: row[3] ? String(row[3]) : '',
+            credit: row[4] ? String(row[4]) : '',
+            balance: row[5] ? String(row[5]) : '',
           };
 
           const particularsLower = transaction.particulars.toLowerCase();
