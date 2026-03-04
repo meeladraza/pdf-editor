@@ -5,42 +5,63 @@ import { formatNumber } from "./faisalExcelParser";
 const GREEN = "#2d6a2d";
 
 // ── Pagination constants ──────────────────────────────────────────────────────
-const A4_HEIGHT_PX = 1123;
-const HEADER_PX = 285;      // logo (90px) + info panel (160px) + gaps + buffer
-const TABLE_HEADER_PX = 38; // th padding:10px×2 + 11pt font + border
-const PAGE_NUM_PX = 40;     // "Page X of X" line at bottom + 10px bottom padding
-const CLOSING_BAL_PX = 20;  // closing balance row (last page)
-const FOOTER_TEXT_PX = 75;  // disclaimer text (last page)
-const ROW_HEIGHT_PX = 20;   // 12px font + padding + border (actual rendered height)
+const A4_HEIGHT_PX    = 1123;
+const HEADER_PX       = 200;  // logo (90px) + info panel (~185px) + safety buffer
+const TABLE_HEADER_PX = 38;   // th row
+const PAGE_NUM_PX     = 40;   // "Page X of X" (every page)
+const CLOSING_BAL_PX  = 20;   // closing balance row  (last page only)
+const FOOTER_TEXT_PX  = 75;   // disclaimer text      (last page only)
+const ROW_HEIGHT_PX   = 20;   // base height: 1-line narration (12px font + padding + border)
+const EXTRA_LINE_PX   = 15;   // extra px added per additional wrapped line
+const CHARS_PER_LINE  = 40;   // ~40 chars fit in the Particulars column per line
 
-// Subtract all bottom elements from every page so last page never overflows
-const ROWS_PX =
-  A4_HEIGHT_PX -
-  HEADER_PX -
-  TABLE_HEADER_PX -
-  PAGE_NUM_PX -
-  CLOSING_BAL_PX -
-  FOOTER_TEXT_PX;
+// ── Row height estimator (accounts for multi-line narrations) ─────────────────
+const estimateRowHeight = (tx: TransactionRow): number => {
+  if (tx.isOpeningBalance || tx.isClosingBalance) return ROW_HEIGHT_PX;
+  const chars = (tx.particulars ?? "").length;
+  const lines = Math.max(1, Math.ceil(chars / CHARS_PER_LINE));
+  return ROW_HEIGHT_PX + (lines - 1) * EXTRA_LINE_PX;
+};
 
 // ── Pagination ────────────────────────────────────────────────────────────────
 const paginateTransactions = (
   transactions: TransactionRow[],
 ): TransactionRow[][] => {
+  const FULL_ROWS = A4_HEIGHT_PX - HEADER_PX - TABLE_HEADER_PX - PAGE_NUM_PX;
+
   const pages: TransactionRow[][] = [];
   let current: TransactionRow[] = [];
   let usedPx = 0;
 
+  // Pass 1: fill every page using estimated row heights
   for (const tx of transactions) {
-    if (usedPx + ROW_HEIGHT_PX > ROWS_PX && current.length > 0) {
+    const h = estimateRowHeight(tx);
+    if (usedPx + h > FULL_ROWS && current.length > 0) {
       pages.push(current);
       current = [];
       usedPx = 0;
     }
     current.push(tx);
-    usedPx += ROW_HEIGHT_PX;
+    usedPx += h;
   }
   if (current.length > 0) pages.push(current);
-  return pages.length > 0 ? pages : [[]];
+  if (pages.length === 0) return [[]];
+
+  // Pass 2: trim last page so closing balance + footer fit
+  const lastIdx = pages.length - 1;
+  const lastAvail = FULL_ROWS - CLOSING_BAL_PX - FOOTER_TEXT_PX;
+  let lastUsed = pages[lastIdx].reduce((sum, tx) => sum + estimateRowHeight(tx), 0);
+  if (lastUsed > lastAvail) {
+    const overflow: TransactionRow[] = [];
+    while (lastUsed > lastAvail && pages[lastIdx].length > 0) {
+      const tx = pages[lastIdx].pop()!;
+      lastUsed -= estimateRowHeight(tx);
+      overflow.unshift(tx);
+    }
+    pages.push(overflow);
+  }
+
+  return pages;
 };
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
@@ -125,7 +146,10 @@ const generateTransactionRow = (tx: TransactionRow, rowIndex: number) => {
       (tx.isOpeningBalance ? "Opening Balance" : "Closing Balance");
     return `
       <tr>
-        <td colspan="4" style="${FONT} font-size:12px; padding:2px 4px; border-bottom:1px solid #191919; text-align:center; font-weight:normal; ${evenBg}">${label}</td>
+      <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
+        <td style="${FONT} font-size:12px; padding:2px 4px; border-bottom:1px solid #191919; text-align:right; font-weight:normal; ${evenBg}">${label}</td>
+        <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
+        <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
         <td style="${FONT} font-size:12px; padding:2px 4px; border:1px solid #191919; border-top: none; text-align:right; font-weight:normal; ${evenBg}">${formatNumber(tx.balance)}</td>
       </tr>
     `;
@@ -196,7 +220,10 @@ const generatePageContent = (
       if (last) {
         closingHtml = `
           <tr>
-            <td colspan="4" style="${FONT} font-size:12px; padding:2px 4px; border-top:1px solid #191919; border-bottom:1px solid #191919; text-align:center; font-weight:normal;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Closing Balance</td>
+          <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
+            <td style="${FONT} font-size:12px; padding:2px 4px; border-top:1px solid #191919; border-bottom:1px solid #191919; text-align:right; font-weight:normal;">Closing Balance</td>
+            <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
+            <td style="border-top:1px solid #191919; border-bottom:1px solid #191919;"></td>
             <td style="${FONT} font-size:12px; padding:2px 4px; border-top:1px solid #191919; border-bottom:1px solid #191919; text-align:right; font-weight:normal;">${formatNumber(last.balance)}</td>
           </tr>
         `;
@@ -205,7 +232,7 @@ const generatePageContent = (
   }
 
   return `
-    <div style="page-break-before:${isFirstPage ? "auto" : "always"}; page-break-inside:avoid;">
+    <div class="mtr-page" style="height:1123px; overflow:hidden; page-break-before:${isFirstPage ? "auto" : "always"};">
       ${generatePageHeader(info)}
       <div style="padding:0 10px;">
         <table style="width:100%; border-collapse:collapse;" cellspacing="0">
@@ -251,6 +278,9 @@ export const generateMetroHTML = (
     @media print {
       body { margin: 0; padding: 0; }
       tr { page-break-inside: avoid; }
+    }
+    @media screen {
+      .mtr-page { border-bottom: 3px solid #bbb; margin-bottom: 4px; }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background: #fff; }

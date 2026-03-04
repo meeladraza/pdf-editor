@@ -26,7 +26,7 @@ export const parseMetroExcelFile = (file: File): Promise<TransactionRow[]> => {
 
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-          const particularsRaw = row[1] ? String(row[1]) : "";
+          const particularsRaw = row[0] ? String(row[0]) : "";
           const particLower = particularsRaw.toLowerCase();
           const isOpeningBalance = particLower.includes("opening balance");
           const isClosingBalance = particLower.includes("closing balance");
@@ -36,7 +36,7 @@ export const parseMetroExcelFile = (file: File): Promise<TransactionRow[]> => {
 
           const transaction: TransactionRow = {
             date: formatDate(row[0]) || "",
-            particulars: particularsRaw,
+            particulars: row[1] ? String(row[1]) : "",
             debit: row[2] ? String(row[2]) : "",
             credit: row[3] ? String(row[3]) : "",
             balance: row[4] ? String(row[4]) : "",
