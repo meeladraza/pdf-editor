@@ -27,8 +27,8 @@ export const parseExcelFile = (file: File): Promise<TransactionRow[]> => {
 
           const transaction: TransactionRow = {
             date: formatDate(row[0]),
-            particulars: row[1] ? String(row[1]) : '',
-            instNo: row[2] ? String(row[2]) : '',
+            particulars: row[2] ? String(row[2]) : '',
+            instNo: row[1] ? String(row[1]) : '',
             debit: row[3] ? String(row[3]) : '',
             credit: row[4] ? String(row[4]) : '',
             balance: row[5] ? String(row[5]) : '',
