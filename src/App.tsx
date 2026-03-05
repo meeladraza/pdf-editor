@@ -214,21 +214,21 @@ function App() {
   };
 
   const handleDataLoaded = (data: TransactionRow[] | FaisalTransactionRow[]) => {
-    if (selectedBank === "ubl")          setUblTransactions(data as TransactionRow[]);
-    else if (selectedBank === "faisal")  setFaisalTransactions(data as FaisalTransactionRow[]);
-    else if (selectedBank === "meezan")  setMeezanTransactions(data as TransactionRow[]);
-    else if (selectedBank === "metro")   setMetroTransactions(data as TransactionRow[]);
+    if (selectedBank === "ubl") setUblTransactions(data as TransactionRow[]);
+    else if (selectedBank === "faisal") setFaisalTransactions(data as FaisalTransactionRow[]);
+    else if (selectedBank === "meezan") setMeezanTransactions(data as TransactionRow[]);
+    else if (selectedBank === "metro") setMetroTransactions(data as TransactionRow[]);
     else if (selectedBank === "sonehri") setSonehriTransactions(data as TransactionRow[]);
-    else if (selectedBank === "dubai")   setDubaiTransactions(data as TransactionRow[]);
-    else if (selectedBank === "mcb")     setMcbTransactions(data as TransactionRow[]);
+    else if (selectedBank === "dubai") setDubaiTransactions(data as TransactionRow[]);
+    else if (selectedBank === "mcb") setMcbTransactions(data as TransactionRow[]);
     else if (selectedBank === "alhabib") setAlhabibTransactions(data as TransactionRow[]);
     else if (selectedBank === "alfalah") setAlfalahTransactions(data as TransactionRow[]);
   };
 
-  const handleGeneratePreview = () => {
+  const handleGeneratePreview = async () => {
     let html = "";
     if (selectedBank === "ubl" && ublTransactions.length > 0)
-      html = generateUBLHTML(ublTransactions, ublAccountInfo);
+      html = await generateUBLHTML(ublTransactions, ublAccountInfo);
     else if (selectedBank === "faisal" && faisalTransactions.length > 0)
       html = generateFaisalHTML(faisalTransactions, faisalAccountInfo);
     else if (selectedBank === "meezan" && meezanTransactions.length > 0)
@@ -242,7 +242,7 @@ function App() {
     else if (selectedBank === "mcb" && mcbTransactions.length > 0)
       html = generateMcbIslamicHTML(mcbTransactions, mcbAccountInfo);
     else if (selectedBank === "alhabib" && alhabibTransactions.length > 0)
-      html = generateBankAlHabibHTML(alhabibTransactions, alhabibAccountInfo);
+      html = await generateBankAlHabibHTML(alhabibTransactions, alhabibAccountInfo);
     else if (selectedBank === "alfalah" && alfalahTransactions.length > 0)
       html = generateBankAlFalahHTML(alfalahTransactions, alfalahAccountInfo);
 
@@ -256,15 +256,15 @@ function App() {
   };
 
   const hasTransactions =
-    selectedBank === "ubl"     ? ublTransactions.length > 0 :
-    selectedBank === "faisal"  ? faisalTransactions.length > 0 :
-    selectedBank === "meezan"  ? meezanTransactions.length > 0 :
-    selectedBank === "metro"   ? metroTransactions.length > 0 :
-    selectedBank === "sonehri" ? sonehriTransactions.length > 0 :
-    selectedBank === "dubai"   ? dubaiTransactions.length > 0 :
-    selectedBank === "mcb"     ? mcbTransactions.length > 0 :
-    selectedBank === "alhabib" ? alhabibTransactions.length > 0 :
-                                 alfalahTransactions.length > 0;
+    selectedBank === "ubl" ? ublTransactions.length > 0 :
+      selectedBank === "faisal" ? faisalTransactions.length > 0 :
+        selectedBank === "meezan" ? meezanTransactions.length > 0 :
+          selectedBank === "metro" ? metroTransactions.length > 0 :
+            selectedBank === "sonehri" ? sonehriTransactions.length > 0 :
+              selectedBank === "dubai" ? dubaiTransactions.length > 0 :
+                selectedBank === "mcb" ? mcbTransactions.length > 0 :
+                  selectedBank === "alhabib" ? alhabibTransactions.length > 0 :
+                    alfalahTransactions.length > 0;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -409,9 +409,9 @@ function App() {
               </p>
               <div className="space-y-2.5 text-left">
                 {([
-                  { Icon: Building2,       color: "blue",   title: "9 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
-                  { Icon: FileSpreadsheet, color: "green",  title: "Excel Import",     sub: "Upload .xlsx or .xls files" },
-                  { Icon: Download,        color: "purple", title: "PDF Export",       sub: "Professional A4 bank statements" },
+                  { Icon: Building2, color: "blue", title: "9 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
+                  { Icon: FileSpreadsheet, color: "green", title: "Excel Import", sub: "Upload .xlsx or .xls files" },
+                  { Icon: Download, color: "purple", title: "PDF Export", sub: "Professional A4 bank statements" },
                 ] as const).map(({ Icon, color, title, sub }) => (
                   <div key={title} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-${color}-100`}>

@@ -100,7 +100,7 @@ const generateTableHeader = () => {
           <p class="s3" style="text-indent: 0pt; text-align: center;">Credit</p>
         </td>
         <td style="width: 109pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt; border-right-style: solid; border-right-width: 1pt;" bgcolor="#C1C1C1">
-          <p class="s3" style="padding-right: 2pt; text-indent: 0pt; text-align: right;">Balance</p>
+          <p class="s3" style="padding-right: 2pt; text-indent: 0pt; text-align: center;">Balance</p>
         </td>
       </tr>
     </thead>
@@ -195,7 +195,7 @@ const generateTransactionRow = (
               }>
           <p class="${styleClass}" style="padding-right: 2pt; text-indent: 0pt; line-height: 11pt; text-align: right;">${
             transaction.balance
-          }</p>
+          }Cr</p>
         </td>`
             : ""
         }
@@ -213,7 +213,7 @@ const generateTotalsTable = (
 ) => {
   return `
     <tfoot>
-      <tr style="height: 39pt">
+      <tr style="height: ${TFOOT_HEIGHT_PT}pt">
         <td style="width: 339pt; border-top-style: solid; border-top-width: 1pt; border-left-style: solid; border-left-width: 1pt; border-bottom-style: solid; border-bottom-width: 1pt;" colspan="2">
           <p class="s3" style="padding-top: 6pt; padding-left: 72pt; padding-right: 94pt; text-indent: 0pt; line-height: 118%; text-align: left;">
             Total Withdrawals &amp; Total Deposits Total number of Transactions
@@ -260,17 +260,17 @@ const generateFooter = (pageNum: number, totalPages: number) => {
 // Effective page height = 842pt / 0.825 ≈ 1021pt.
 const A4_HEIGHT_PT = 1021;
 // Space reserved at the bottom for footer (matches margin-bottom: 120pt on table div)
-const FOOTER_RESERVED_PT = 120;
+const FOOTER_RESERVED_PT = 80;
 // Tfoot totals row height (only on last page)
-const TFOOT_HEIGHT_PT = 39;
+const TFOOT_HEIGHT_PT = 20;
 
 // Estimated overhead height per page type (header + table header)
 // First page: logo image ~60pt + branch code ~18pt + account info box ~120pt +
 //             "Account Statement" text ~30pt + br spacer ~13pt + table header 18pt
-const FIRST_PAGE_HEADER_PT = 259;
+const FIRST_PAGE_HEADER_PT = 208;
 // Subsequent pages: logo ~60pt + branch code ~18pt + title/no row ~22pt +
 //                   "Account Statement" ~15pt + table header 18pt
-const OTHER_PAGE_HEADER_PT = 133;
+const OTHER_PAGE_HEADER_PT = 100;
 
 // Available height for transaction rows on each page type
 const FIRST_PAGE_ROWS_PT =
@@ -278,41 +278,92 @@ const FIRST_PAGE_ROWS_PT =
 const OTHER_PAGE_ROWS_PT =
   A4_HEIGHT_PT - OTHER_PAGE_HEADER_PT - FOOTER_RESERVED_PT - TFOOT_HEIGHT_PT;
 
-// Each particulars line height in pt (matches tr height: 13pt / 12pt)
-const ROW_LINE_PT = 13;
-const ROW_LAST_LINE_PT = 12;
+// ── Pagination logic ──────────────────────────────────────────────────────────
 
-const getTransactionRowHeight = (transaction: TransactionRow): number => {
-  const lineCount = transaction.particulars.split("\n").length;
-  return (lineCount - 1) * ROW_LINE_PT + ROW_LAST_LINE_PT;
+/**
+ * Measures actual row heights by rendering them into a hidden off-screen div.
+ * This handles dynamic heights from multi-line particulars.
+ */
+const measureRowHeights = (rows: TransactionRow[]): number[] => {
+  // Create off-screen container
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.top = "-9999px";
+  container.style.left = "-9999px";
+  container.style.width = "962px"; // UBL wrapper width
+  container.style.visibility = "hidden";
+
+  // Use simple styles for measurement (just enough to get the right box model)
+  container.innerHTML = `
+    <table style="width: 100%; border-collapse: collapse; font-family: 'Times New Roman', serif; font-size: 11pt;" cellspacing="0">
+      ${generateTableHeader()}
+      <tbody>
+        ${rows.map((tx) => generateTransactionRow(tx, false)).join("")}
+      </tbody>
+    </table>
+  `;
+
+  document.body.appendChild(container);
+
+  // Measure each tr in tbody
+  const trs = container.querySelectorAll("tbody tr");
+
+  // Factor to convert measured pixels to points (96dpi to 72pt)
+  const pxToPt = 0.75;
+
+  // Note: generateTransactionRow returns one or more <tr> depending on particulars.split("\n")
+  // We need to group them back to get one height per transaction.
+  const heights: number[] = [];
+  let trIndex = 0;
+
+  rows.forEach((tx) => {
+    const lineCount = tx.particulars.split("\n").length;
+    let txHeightPx = 0;
+    for (let i = 0; i < lineCount; i++) {
+      if (trs[trIndex]) {
+        txHeightPx += trs[trIndex].getBoundingClientRect().height;
+        trIndex++;
+      }
+    }
+    heights.push(txHeightPx * pxToPt);
+  });
+
+  // Cleanup
+  document.body.removeChild(container);
+  return heights;
 };
 
-const paginateTransactions = (
-  transactions: TransactionRow[],
+/**
+ * Splits transactions into pages based on measured pixel heights.
+ */
+const paginateByMeasuredHeight = (
+  rows: TransactionRow[],
+  heights: number[],
 ): TransactionRow[][] => {
   const pages: TransactionRow[][] = [];
   let currentPage: TransactionRow[] = [];
-  let currentHeight = 0;
+  let usedPx = 0;
   let availableHeight = FIRST_PAGE_ROWS_PT;
 
-  for (const tx of transactions) {
-    const rowHeight = getTransactionRowHeight(tx);
-    if (currentHeight + rowHeight > availableHeight && currentPage.length > 0) {
+  rows.forEach((row, i) => {
+    const rowH = heights[i];
+    if (usedPx + rowH > availableHeight && currentPage.length > 0) {
       pages.push(currentPage);
       currentPage = [];
-      currentHeight = 0;
+      usedPx = 0;
       availableHeight = OTHER_PAGE_ROWS_PT;
     }
-    currentPage.push(tx);
-    currentHeight += rowHeight;
-  }
+    currentPage.push(row);
+    usedPx += rowH;
+  });
 
-  if (currentPage.length > 0) {
-    pages.push(currentPage);
-  }
+  if (currentPage.length > 0) pages.push(currentPage);
+  if (pages.length === 0) pages.push([]);
 
-  return pages.length > 0 ? pages : [[]];
+  return pages;
 };
+
+// (paginateTransactions removed in favor of paginateByMeasuredHeight)
 
 const generatePageContent = (
   transactions: TransactionRow[],
@@ -346,7 +397,7 @@ const generatePageContent = (
   return `
     <div style="page-break-before: ${isFirstPage ? "auto" : "always"}; position: relative; min-height: 100vh; display: flex; flex-direction: column;">
       ${generateHeaderSection(accountInfo, isFirstPage)}
-      <div style="padding-left: 3pt; padding-right: 6pt; flex-grow: 1; margin-bottom: 120pt; z-index: 4;">
+      <div style="padding-left: 3pt; padding-right: 6pt; flex-grow: 1; margin-bottom: ${FOOTER_RESERVED_PT}pt; z-index: 4;">
         <table style="width: 100%; border-collapse: collapse;" cellspacing="0">
           ${tableHeader}
           <tbody>
@@ -360,11 +411,12 @@ const generatePageContent = (
   `;
 };
 
-export const generateUBLHTML = (
+export const generateUBLHTML = async (
   allTransactions: TransactionRow[],
   accountInfo: UBLAccountInfo,
-): string => {
-  const pages = paginateTransactions(allTransactions);
+): Promise<string> => {
+  const measuredHeights = measureRowHeights(allTransactions);
+  const pages = paginateByMeasuredHeight(allTransactions, measuredHeights);
 
   const totalPages = Math.max(1, pages.length);
 
