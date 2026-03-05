@@ -7,8 +7,8 @@ const BORDER = "2px solid #000";
 
 // ── Pagination constants ──────────────────────────────────────────────────────
 const A4_HEIGHT_PX = 1123;
-const HEADER_PX = 130; // logo row + print date + branch row (every page, with buffer)
-const ACCT_INFO_PX = 125; // account info panel + opening balance row (page 1 only)
+const HEADER_PX = 90; // logo row + print date + branch row (every page, with buffer)
+const ACCT_INFO_PX = 135; // account info panel + opening balance row (page 1 only)
 const TBL_HEADER_PX = 38; // column header row (every page)
 const BOTTOM_PX = 220; // totals row + summary table + footer text (last page, always reserved)
 const ROW_HEIGHT_PX = 16; // transaction row height with buffer
@@ -146,23 +146,19 @@ const generateOpeningBalanceRow = (info: McbIslamicAccountInfo) => `
 // ── Table styles ──────────────────────────────────────────────────────────────
 const TH = `${FONT} font-size: 5.5pt; font-weight: 580; padding: 4px 2px;
             background-color: #fff; color: #000; text-align: center; border: 2px solid #000;`;
-const TD = `${FONT} font-size: 5.5pt; border: 2px solid #000; font-weight: 300;`;
+const TD = `${FONT} font-size: 5.5pt; border: 2px solid #000; font-weight: 300; padding: 2px 2px;`;
 const TD_NUM = `${TD} text-align: right;`;
 
 // ── Table column headers ──────────────────────────────────────────────────────
 const generateTableHeader = () => `
   <thead>
     <tr>
-      <th style="${TH} width: 6.5%;">Tran Date</th>
-      <th style="${TH} width: 7%;">Value Date</th>
-      <th style="${TH} width: 5%;">Tran Br.</th>
-      <th style="${TH} width: 21.7%;">Tran Description</th>
-      <th style="${TH} width: 17.3%;">Narrative/ Addl Text</th>
-      <th style="${TH} width: 11%;">Ext . Reference No</th>
-      <th style="${TH} width: 9%;">Instrument No</th>
-      <th style="${TH} width: 7.5%;">Debit</th>
-      <th style="${TH} width: 7.5%;">Credit</th>
-      <th style="${TH} width: 7.5%;">Balance</th>
+      <th style="${TH} width: 10%;">Tran Date</th>
+      <th style="${TH} width: 40%;">Tran Description</th>
+      <th style="${TH} width: 20%;">Ext . Reference No</th>
+      <th style="${TH} width: 10%;">Debit</th>
+      <th style="${TH} width: 10%;">Credit</th>
+      <th style="${TH} width: 10%;">Balance</th>
     </tr>
   </thead>
 `;
@@ -172,12 +168,8 @@ const generateTransactionRow = (tx: TransactionRow, rowIndex: number) => {
   return `
   <tr>
     <td style="${TD} text-align: center;">${tx.date}</td>
-    <td style="${TD} text-align: center;">${tx.valueDate || ""}</td>
-    <td style="${TD} text-align: center;">${tx.tranBranch || ""}</td>
     <td style="${TD}">${tx.particulars}</td>
-    <td style="${TD}">${tx.narrative || ""}</td>
     <td style="${TD}">${tx.extReference || ""}</td>
-    <td style="${TD}">${tx.instNo || ""}</td>
     <td style="${TD_NUM}">${tx.debit ? formatNumber(tx.debit) : ""}</td>
     <td style="${TD_NUM}">${tx.credit ? formatNumber(tx.credit) : ""}</td>
     <td style="${TD_NUM}">${formatNumber(tx.balance)}</td>
@@ -188,10 +180,6 @@ const generateTransactionRow = (tx: TransactionRow, rowIndex: number) => {
 // ── Totals footer row (inside table, last page) ───────────────────────────────
 const generateTotalsRow = (totalDebit: string, totalCredit: string) => `
   <tr>
-    <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
-    <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
-    <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
-    <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
     <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
     <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px;"></td>
     <td style="font-size: 5.5pt; font-weight: 300; padding: 4px 0px; font-weight: bold; text-align: right;">Total</td>
@@ -283,8 +271,7 @@ export const generateMcbIslamicHTML = (
       ? generateSummarySection(info, lastBalance, totalRows)
       : "";
 
-    const footerHtml =
-      isLastPage ? generateFooterText() : "";
+    const footerHtml = isLastPage ? generateFooterText() : "";
 
     return `
       <div style="page-break-before: ${isFirstPage ? "auto" : "always"};">

@@ -5,7 +5,9 @@ import { formatNumber } from "./faisalExcelParser";
 
 export { formatNumber };
 
-export const parseMcbIslamicExcelFile = (file: File): Promise<TransactionRow[]> => {
+export const parseMcbIslamicExcelFile = (
+  file: File,
+): Promise<TransactionRow[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -42,15 +44,15 @@ export const parseMcbIslamicExcelFile = (file: File): Promise<TransactionRow[]> 
 
           const transaction: TransactionRow = {
             date: formatDateShort(row[0]) || "",
-            valueDate: row[1] ? formatDateShort(row[1]) : "",
-            tranBranch: row[2] ? String(row[2]) : "",
-            particulars: row[3] ? String(row[3]) : "",
-            narrative: row[4] ? String(row[4]) : "",
-            extReference: row[5] ? String(row[5]) : "",
-            instNo: row[6] ? String(row[6]) : "",
-            debit: row[7] ? String(row[7]) : "",
-            credit: row[8] ? String(row[8]) : "",
-            balance: row[9] ? String(row[9]) : "",
+            valueDate: "",
+            tranBranch: "",
+            particulars: row[2] ? String(row[2]) : "",
+            narrative: "",
+            extReference: row[1] ? String(row[1]) : "",
+            instNo: "",
+            debit: row[3] ? String(row[3]) : "",
+            credit: row[4] ? String(row[4]) : "",
+            balance: row[5] ? String(row[5]) : "",
           };
 
           transactions.push(transaction);
