@@ -206,25 +206,11 @@ const generateTransactionRow = (
   return rowsHtml;
 };
 
-const generateTotalsTable = (transactions: TransactionRow[]) => {
-  let totalDebit = 0;
-  let totalCredit = 0;
-  let transactionCount = 0;
-
-  transactions.forEach((tx) => {
-    if (!tx.isOpeningBalance && !tx.isClosingBalance) {
-      if (tx.debit) {
-        const debitNum = parseFloat(String(tx.debit).replace(/,/g, ""));
-        if (!isNaN(debitNum)) totalDebit += debitNum;
-      }
-      if (tx.credit) {
-        const creditNum = parseFloat(String(tx.credit).replace(/,/g, ""));
-        if (!isNaN(creditNum)) totalCredit += creditNum;
-      }
-      transactionCount++;
-    }
-  });
-
+const generateTotalsTable = (
+  totalDebit: number,
+  totalCredit: number,
+  transactionCount: number,
+) => {
   return `
     <tfoot>
       <tr style="height: 39pt">
@@ -334,6 +320,11 @@ const generatePageContent = (
   isFirstPage: boolean,
   pageNum: number,
   totalPages: number,
+  overallTotals: {
+    totalDebit: number;
+    totalCredit: number;
+    transactionCount: number;
+  },
 ): string => {
   const tableHeader = generateTableHeader();
 
@@ -344,7 +335,13 @@ const generatePageContent = (
   });
 
   const totalsTableContent =
-    pageNum === totalPages ? generateTotalsTable(transactions) : "";
+    pageNum === totalPages
+      ? generateTotalsTable(
+          overallTotals.totalDebit,
+          overallTotals.totalCredit,
+          overallTotals.transactionCount,
+        )
+      : "";
 
   return `
     <div style="page-break-before: ${isFirstPage ? "auto" : "always"}; position: relative; min-height: 100vh; display: flex; flex-direction: column;">
@@ -371,6 +368,26 @@ export const generateUBLHTML = (
 
   const totalPages = Math.max(1, pages.length);
 
+  let totalDebit = 0;
+  let totalCredit = 0;
+  let transactionCount = 0;
+
+  allTransactions.forEach((tx) => {
+    if (!tx.isOpeningBalance && !tx.isClosingBalance) {
+      if (tx.debit) {
+        const debitNum = parseFloat(String(tx.debit).replace(/,/g, ""));
+        if (!isNaN(debitNum)) totalDebit += debitNum;
+      }
+      if (tx.credit) {
+        const creditNum = parseFloat(String(tx.credit).replace(/,/g, ""));
+        if (!isNaN(creditNum)) totalCredit += creditNum;
+      }
+      transactionCount++;
+    }
+  });
+
+  const overallTotals = { totalDebit, totalCredit, transactionCount };
+
   // Generate pages
   let pagesHtml = pages
     .map((pageTransactions, index) =>
@@ -380,6 +397,7 @@ export const generateUBLHTML = (
         index === 0,
         index + 1,
         totalPages,
+        overallTotals,
       ),
     )
     .join("");
