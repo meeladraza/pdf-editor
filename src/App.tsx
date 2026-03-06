@@ -236,7 +236,7 @@ function App() {
     else if (selectedBank === "metro" && metroTransactions.length > 0)
       html = generateMetroHTML(metroTransactions, metroAccountInfo);
     else if (selectedBank === "sonehri" && sonehriTransactions.length > 0)
-      html = generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
+      html = await generateSonehriHTML(sonehriTransactions, sonehriAccountInfo);
     else if (selectedBank === "dubai" && dubaiTransactions.length > 0)
       html = generateDubaiHTML(dubaiTransactions, dubaiAccountInfo);
     else if (selectedBank === "mcb" && mcbTransactions.length > 0)

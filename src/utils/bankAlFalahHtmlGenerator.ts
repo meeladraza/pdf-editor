@@ -126,8 +126,8 @@ const generateTotalRow = (totalDebit: number, totalCredit: number) => `
   <tfoot>
     <tr>
       <td style="${TD_TOTAL}"></td>
-      <td style="${TD_TOTAL} text-align: right; padding-right: 8px;">TOTAL :</td>
       <td style="${TD_TOTAL}"></td>
+      <td style="${TD_TOTAL} text-align: right; padding-right: 8px;">TOTAL :</td>
       <td style="${TD_TOTAL}"></td>
       <td style="${TD_TOTAL} text-align: right;">${totalDebit === 0 ? "-" : formatAmount(totalDebit)}</td>
       <td style="${TD_TOTAL} text-align: right;">${formatAmount(totalCredit)}</td>
@@ -143,56 +143,63 @@ const generateFavouritesSection = (info: BankAlFalahAccountInfo) => `
 
     <!-- Box 1: Favourites tab -->
     <div style="border: 1px solid #ccc;
-                 padding: 6px; ${FONT} font-size: 9pt; font-weight: bold; white-space: nowrap;
+                 padding: 6px; ${FONT} font-size: 8.5pt; font-weight: bold; white-space: nowrap;
                  display: inline-block; cursor: pointer;">
-      <span style="border-top: 1px solid #000; border-bottom: 1px solid #ccc; w-full padding: 14px 6px; min-width:120px;">Favourites</span>
+      <span style="border-top: 1px solid #000; border-bottom: 1px solid #ccc; w-full padding: 16px 10px 20px 6px; min-width:120px;">Favourites</span>
     </div>
 
     <!-- Box 2: Filter search box -->
     <div style="border: 1px solid #ccc; flex: 1;">
 
       <!-- Header row: stmtText | More Options + Clear Selection + Find -->
+
       <div style="display: flex; align-items: center; justify-content: space-between;
-                  border-bottom: 1px solid #ccc; padding: 5px 8px;">
-        <span style="${FONT} font-size: 9pt; font-weight: bold;">${info.stmtText}</span>
+                  padding: 4px 4px 2px 4px;">
+        <span style="${FONT} font-size: 8pt; font-weight: normal;">${info.stmtText}</span>
         <div style="display: flex; align-items: center; gap: 4px;">
-          <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.6;">
-            <a style="color: #00c; text-decoration: underline; ${FONT} font-size: 8pt; cursor: pointer;">More Options</a>
-            <a style="color: #00c; text-decoration: underline; ${FONT} font-size: 8pt; cursor: pointer;">Clear Selection</a>
+          <div style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.4;">
+            <a style="color: #00c; text-decoration: underline; ${FONT} font-size: 7pt; cursor: pointer;">More Options</a>
+            <a style="color: #00c; text-decoration: underline; ${FONT} font-size: 7pt; cursor: pointer;">Clear Selection</a>
           </div>
-          <span style="border: 1px solid #aaa; box-shadow: 1px 1px 2px rgba(0,0,0,0.18);
-                       padding: 2px 10px; ${FONT} font-size: 8pt; background: #f5f5f5;
-                       margin-left: 4px; cursor: pointer;">Find</span>
+          <span style="border-bottom: 1px solid #858585; border-right: 1px solid #c6c6c6; border-top: 1px solid #ccc; border-left: 1px solid #ccc; height: 24px; vertical-align: center;
+                       padding: 4px 10px 0px 10px; ${FONT} font-size: 8pt;
+                       margin-left: 4px; vertical-align: center; color: #585973;">Find</span>
         </div>
       </div>
+      <div style="border-bottom: 1px solid #ccc; margin: 0 4px;"></div>
 
       <!-- BOOKING DATE row -->
-      <div style="display: flex; align-items: center; gap: 8px; padding: 10px 32px;">
-        <label style="${FONT} font-size: 8pt; font-weight: bold; min-width: 110px;">BOOKING DATE</label>
-        <div style="border: 1px solid #aaa; padding: 2px 6px; ${FONT} font-size: 8pt;
-                    min-width: 90px; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+      <div style="padding: 4px 8px 12px 8px; ${FONT} color: #000; display: flex; flex-direction: column; gap: 4px;">
+      <div style="display: flex; align-items: flex-start; gap: 4px;">
+        <label style="font-size: 8pt; font-weight: bold; width: 23%">BOOKING.DATE</label>
+        <div style="border: 1px solid #ccc; padding: 0px 4px; ${FONT} font-size: 9pt; width: 38%;
+                    display: flex; align-items: center; justify-content: space-between; gap: 6px;">
           <span>equals</span><span>&#9660;</span>
         </div>
-        <div style="border: 1px solid #aaa; padding: 2px 8px; ${FONT} font-size: 8pt; min-width: 40px;">
-          ${info.bookingDate}
+        <div style="border: 1px solid #ccc; ${FONT} font-size: 9pt; width: 38%;">
+        ${info.bookingDate}
+        </div>
+      </div>
+        <div style="display: flex; align-items: flex-start; gap: 4px;">
+        <label style="font-size: 8pt; font-weight: bold; width: 23%">ACCOUNT</label>
+        <div style="padding: 0px 4px; ${FONT} font-size: 8pt; width: 38%;">
+          <span>equals
+        </div>
+        <div style="border: 1px solid #ccc; ${FONT} font-size: 9pt; width: 38%;">
+        ${info.accountNo}
         </div>
       </div>
 
       <!-- ACCOUNT row -->
-      <div style="display: flex; align-items: center; gap: 8px; padding: 4px 8px 8px 8px;">
-        <label style="${FONT} font-size: 8pt; font-weight: bold; min-width: 110px;">ACCOUNT</label>
-        <span style="${FONT} font-size: 8pt;">equals</span>
-        <div style="border: 1px solid #aaa; padding: 2px 8px; ${FONT} font-size: 8pt; min-width: 110px;">
-          ${info.accountNo}
-        </div>
+      
       </div>
 
       <!-- Separator -->
-      <div style="border-bottom: 1px solid #ccc; margin: 0 8px 4px 8px;"></div>
+      <div style="border-bottom: 1px solid #ccc; margin: 0 4px;"></div>
 
       <!-- Account IBAN row -->
-      <div style="padding: 4px 8px 6px 8px; ${FONT} font-size: 8pt; color: #000;">
-        Account IBAN : ${info.iban} : ${info.stmtText}
+      <div style="padding: 2px 8px 6px 8px; ${FONT} font-size: 8pt; color: #000;">
+        ${info.iban} : ${info.stmtText}
       </div>
 
     </div>
@@ -202,8 +209,7 @@ const generateFavouritesSection = (info: BankAlFalahAccountInfo) => `
 // ── Footer (every page) ───────────────────────────────────────────────────────
 const generateFooter = (pageNum: number, totalPages: number) => `
   <div style="display: flex; justify-content: space-between; align-items: center;
-              padding: 4px 16px; ${FONT} font-size: 8pt; color: #000;
-              border-top: 1px solid #ccc; margin-top: auto;">
+              padding: 20px 32px 20px 32px; font-family: Arial; font-size: 8pt; color: #000; margin-top: auto;">
     <a href="https://t24.bankalfalah.com/BAFT24/servlet/BrowserServlet"
        style="color: #000; text-decoration: none;">
       https://t24.bankalfalah.com/BAFT24/servlet/BrowserServlet
