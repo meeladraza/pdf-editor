@@ -10,38 +10,79 @@ const OPENING_BAL_PX     = 22;   // "OPENING BALANCE:" (page 1 only)
 const TBL_HEADER_PX      = 28;   // column header row
 const FAV_SECTION_PX     = 190;  // Favourites + filter box (last page only)
 const FOOTER_PX          = 30;   // footer bar
-const ROW_HEIGHT_PX      = 20;
+
 
 const AVAIL_FIRST_AND_LAST = A4_HEIGHT_PX - HEADER_PX - RED_HEADING_PX - OPENING_BAL_PX - TBL_HEADER_PX - FAV_SECTION_PX - FOOTER_PX;
 const AVAIL_FIRST_ONLY     = A4_HEIGHT_PX - HEADER_PX - RED_HEADING_PX - OPENING_BAL_PX - TBL_HEADER_PX - FOOTER_PX;
 const AVAIL_LAST_ONLY      = A4_HEIGHT_PX - HEADER_PX - TBL_HEADER_PX - FAV_SECTION_PX - FOOTER_PX;
 const AVAIL_MIDDLE         = A4_HEIGHT_PX - HEADER_PX - TBL_HEADER_PX - FOOTER_PX;
 
-const MAX_ROWS_SINGLE  = Math.floor(AVAIL_FIRST_AND_LAST / ROW_HEIGHT_PX);
-const MAX_ROWS_FIRST   = Math.floor(AVAIL_FIRST_ONLY / ROW_HEIGHT_PX);
-const MAX_ROWS_LAST    = Math.floor(AVAIL_LAST_ONLY / ROW_HEIGHT_PX);
-const MAX_ROWS_MIDDLE  = Math.floor(AVAIL_MIDDLE / ROW_HEIGHT_PX);
+// ── DOM-based row height measurement ──────────────────────────────────────────
+const measureRowHeights = (rows: TransactionRow[]): number[] => {
+  const container = document.createElement("div");
+  container.style.cssText =
+    "position:absolute; top:-9999px; left:-9999px; width:768px; visibility:hidden;";
+  container.innerHTML = `
+    <table style="width:86%; border-collapse:collapse; font-family:'Times New Roman',serif;">
+      ${generateTableHeader()}
+      <tbody>
+        ${rows.map(generateRow).join("")}
+      </tbody>
+    </table>`;
+  document.body.appendChild(container);
+  const trs = container.querySelectorAll("tbody tr");
+  const heights = Array.from(trs).map((tr) => tr.getBoundingClientRect().height);
+  document.body.removeChild(container);
+  return heights;
+};
 
 // ── Pagination ─────────────────────────────────────────────────────────────────
-const paginateTransactions = (rows: TransactionRow[]): TransactionRow[][] => {
+const paginateByMeasuredHeight = (
+  rows: TransactionRow[],
+  heights: number[],
+): TransactionRow[][] => {
   if (rows.length === 0) return [[]];
 
-  // All rows fit on a single page (first + last combined constraints)
-  if (rows.length <= MAX_ROWS_SINGLE) return [rows];
+  const totalHeight = heights.reduce((s, h) => s + h, 0);
+  if (totalHeight <= AVAIL_FIRST_AND_LAST) return [rows];
 
   const pages: TransactionRow[][] = [];
-  let remaining = [...rows];
+  const remaining = rows.slice();
+  const remHeights = heights.slice();
 
-  // First page
-  pages.push(remaining.splice(0, MAX_ROWS_FIRST));
+  // Page 1
+  const page1: TransactionRow[] = [];
+  let used = 0;
+  while (remaining.length > 0 && used + remHeights[0] <= AVAIL_FIRST_ONLY) {
+    page1.push(remaining.shift()!);
+    used += remHeights.shift()!;
+  }
+  if (page1.length === 0 && remaining.length > 0) {
+    page1.push(remaining.shift()!);
+    remHeights.shift();
+  }
+  pages.push(page1);
 
-  // Middle pages (leave enough for last page)
-  while (remaining.length > MAX_ROWS_LAST) {
-    pages.push(remaining.splice(0, MAX_ROWS_MIDDLE));
+  // Middle + last pages
+  while (remaining.length > 0) {
+    const remTotal = remHeights.reduce((s, h) => s + h, 0);
+    if (remTotal <= AVAIL_LAST_ONLY) {
+      pages.push(remaining.splice(0));
+      break;
+    }
+    const page: TransactionRow[] = [];
+    used = 0;
+    while (remaining.length > 0 && used + remHeights[0] <= AVAIL_MIDDLE) {
+      page.push(remaining.shift()!);
+      used += remHeights.shift()!;
+    }
+    if (page.length === 0 && remaining.length > 0) {
+      page.push(remaining.shift()!);
+      remHeights.shift();
+    }
+    pages.push(page);
   }
 
-  // Last page
-  pages.push(remaining);
   return pages;
 };
 
@@ -208,8 +249,8 @@ const generateFavouritesSection = (info: BankAlFalahAccountInfo) => `
 
 // ── Footer (every page) ───────────────────────────────────────────────────────
 const generateFooter = (pageNum: number, totalPages: number) => `
-  <div style="display: flex; justify-content: space-between; align-items: center;
-              padding: 20px 32px 20px 32px; font-family: Arial; font-size: 8pt; color: #000; margin-top: auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+              padding: 20px 32px 20px 32px; font-family: Arial; font-size: 8pt; color: #000;">
     <a href="https://t24.bankalfalah.com/BAFT24/servlet/BrowserServlet"
        style="color: #000; text-decoration: none;">
       https://t24.bankalfalah.com/BAFT24/servlet/BrowserServlet
@@ -219,11 +260,12 @@ const generateFooter = (pageNum: number, totalPages: number) => `
 `;
 
 // ── Main layout ───────────────────────────────────────────────────────────────
-export const generateBankAlFalahHTML = (
+export const generateBankAlFalahHTML = async (
   transactions: TransactionRow[],
   info: BankAlFalahAccountInfo,
-): string => {
-  const txPages = paginateTransactions(transactions);
+): Promise<string> => {
+  const measuredHeights = measureRowHeights(transactions);
+  const txPages = paginateByMeasuredHeight(transactions, measuredHeights);
   const totalPages = txPages.length;
   const isSinglePage = totalPages === 1;
 
@@ -249,8 +291,8 @@ export const generateBankAlFalahHTML = (
       ${isFirstPage ? generateRedHeading() : ""}
       ${isFirstPage ? generateOpeningBalanceLine(info) : ""}
 
-      <!-- Transaction table (no flex:1 — natural height so Favourites sits right below) -->
-      <div style="padding: 0 58px;">
+      <!-- Transaction table -->
+      <div style="${isLastPage ? "overflow: hidden;" : "flex: 1; min-height: 0; overflow: hidden;"} padding: 0 58px;">
         <table style="width: 86%; border-collapse: collapse;">
           ${generateTableHeader()}
           <tbody>
@@ -262,14 +304,14 @@ export const generateBankAlFalahHTML = (
 
       ${isLastPage ? generateFavouritesSection(info) : ""}
 
-      <!-- Spacer pushes footer to page bottom -->
-      <div style="flex: 1;"></div>
+      <!-- Spacer: only on last page (other pages the table fills the space) -->
+      ${isLastPage ? '<div style="flex: 1;"></div>' : ""}
 
       ${generateFooter(pageNum, totalPages)}
     </div>
   `;
 
-  const pages = txPages.map((rows, idx) =>
+  const pages = txPages.map((rows: TransactionRow[], idx: number) =>
     buildPage(idx + 1, rows, idx === 0, isSinglePage ? true : idx === txPages.length - 1),
   );
 
