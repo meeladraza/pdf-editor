@@ -10,7 +10,7 @@ const generateHeaderSection = (accountInfo: MeezanAccountInfo) => {
      <img src="/meezan-logo.png" style="width: 160px; height: 25px; margin-left: -12px" />
      <div style="display:flex; flex-direction: column; gap: 1px; color: #B21500;">
        <span>${accountInfo.branchName}</span>
-       <span>${'NADIR HOUSE I I CHUNDRIGAR ROAD KARACHI'}</span>
+       <span>${accountInfo.branchAddress}</span>
        <span>QUICK ACCOUNT TRANSACTIONS</span>
      </div>
     </div>
