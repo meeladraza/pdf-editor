@@ -16,13 +16,14 @@ import { DubaiIslamicAccountInfoForm } from "./components/DubaiIslamicAccountInf
 import { McbIslamicAccountInfoForm } from "./components/McbIslamicAccountInfoForm";
 import { BankAlHabibAccountInfoForm } from "./components/BankAlHabibAccountInfoForm";
 import { BankAlFalahAccountInfoForm } from "./components/BankAlFalahAccountInfoForm";
+import { HBLAccountInfoForm } from "./components/HBLAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow, FaisalTransactionRow,
   UBLAccountInfo, FaisalAccountInfo, MeezanAccountInfo,
   MetroAccountInfo, SonehriAccountInfo, DubaiIslamicAccountInfo,
   McbIslamicAccountInfo, BankAlHabibAccountInfo, BankAlFalahAccountInfo,
-  BankType,
+  HBLAccountInfo, BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
 import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
@@ -33,6 +34,7 @@ import { generateDubaiHTML } from "./utils/dubaiHtmlGenerator";
 import { generateMcbIslamicHTML } from "./utils/mcbIslamicHtmlGenerator";
 import { generateBankAlHabibHTML } from "./utils/bankAlHabibHtmlGenerator";
 import { generateBankAlFalahHTML } from "./utils/bankAlFalahHtmlGenerator";
+import { generateHBLHTML } from "./utils/hblHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -54,6 +56,7 @@ function App() {
   const [mcbTransactions, setMcbTransactions] = useState<TransactionRow[]>([]);
   const [alhabibTransactions, setAlhabibTransactions] = useState<TransactionRow[]>([]);
   const [alfalahTransactions, setAlfalahTransactions] = useState<TransactionRow[]>([]);
+  const [hblTransactions, setHblTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -104,6 +107,7 @@ function App() {
 
   const [meezanAccountInfo, setMeezanAccountInfo] = useState<MeezanAccountInfo>({
     branchName: "9937-NADIR HOUSE II-KARACHI",
+    branchAddress: "NADIR HOUSE I I CHUNDRIGAR ROAD KARACHI",
     accountTitle: "AR INDUSTRIES",
     address: "PLOT NO. L-18, BLOCK 22, FEDERAL",
     address2: "'B' AREA, KARACHI CENTRAL GULBERG-TOWN, KARACHI (0321-9216849)",
@@ -181,6 +185,19 @@ function App() {
     bookingDate: "20",
   });
 
+  const [hblAccountInfo, setHblAccountInfo] = useState<HBLAccountInfo>({
+    branchName: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
+    accountHolderName: "RADIUM SILK FACTORY",
+    address1: "PLOT NO.18/1/4 BLOCK NO.22",
+    address2: "INDUSTRIAL AREA F.B.AREA",
+    address3: "KARACHI",
+    date: "24 Nov 2025",
+    accountType: "ISLAMIC CURRENT ACCOUNT",
+    accountNo: "0004*******61-03",
+    currency: "Pakistan Rupee",
+    iban: "PK03 **** **** **** 6103",
+  });
+
   const [alhabibAccountInfo, setAlhabibAccountInfo] = useState<BankAlHabibAccountInfo>({
     printDate: "22/10/2025",
     branchCode: "1011",
@@ -210,6 +227,7 @@ function App() {
     setMcbTransactions([]);
     setAlhabibTransactions([]);
     setAlfalahTransactions([]);
+    setHblTransactions([]);
     setHtmlContent("");
   };
 
@@ -223,6 +241,7 @@ function App() {
     else if (selectedBank === "mcb") setMcbTransactions(data as TransactionRow[]);
     else if (selectedBank === "alhabib") setAlhabibTransactions(data as TransactionRow[]);
     else if (selectedBank === "alfalah") setAlfalahTransactions(data as TransactionRow[]);
+    else if (selectedBank === "hbl")     setHblTransactions(data as TransactionRow[]);
   };
 
   const handleGeneratePreview = async () => {
@@ -244,7 +263,9 @@ function App() {
     else if (selectedBank === "alhabib" && alhabibTransactions.length > 0)
       html = await generateBankAlHabibHTML(alhabibTransactions, alhabibAccountInfo);
     else if (selectedBank === "alfalah" && alfalahTransactions.length > 0)
-      html = generateBankAlFalahHTML(alfalahTransactions, alfalahAccountInfo);
+      html = await generateBankAlFalahHTML(alfalahTransactions, alfalahAccountInfo);
+    else if (selectedBank === "hbl" && hblTransactions.length > 0)
+      html = await generateHBLHTML(hblTransactions, hblAccountInfo);
 
     if (html) { setHtmlContent(html); setIsModalOpen(true); }
     else alert("Please upload an Excel file first");
@@ -264,7 +285,8 @@ function App() {
               selectedBank === "dubai" ? dubaiTransactions.length > 0 :
                 selectedBank === "mcb" ? mcbTransactions.length > 0 :
                   selectedBank === "alhabib" ? alhabibTransactions.length > 0 :
-                    alfalahTransactions.length > 0;
+                    selectedBank === "alfalah" ? alfalahTransactions.length > 0 :
+                      hblTransactions.length > 0;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -351,7 +373,7 @@ function App() {
 
         {/* Sidebar footer */}
         <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-          <p className="text-[10px] text-slate-400 text-center">9 bank templates · A4 PDF export</p>
+          <p className="text-[10px] text-slate-400 text-center">10 bank templates · A4 PDF export</p>
         </div>
       </aside>
 
@@ -390,8 +412,10 @@ function App() {
               <McbIslamicAccountInfoForm accountInfo={mcbAccountInfo} onChange={setMcbAccountInfo} />
             ) : selectedBank === "alhabib" ? (
               <BankAlHabibAccountInfoForm accountInfo={alhabibAccountInfo} onChange={setAlhabibAccountInfo} />
-            ) : (
+            ) : selectedBank === "alfalah" ? (
               <BankAlFalahAccountInfoForm accountInfo={alfalahAccountInfo} onChange={setAlfalahAccountInfo} />
+            ) : (
+              <HBLAccountInfoForm accountInfo={hblAccountInfo} onChange={setHblAccountInfo} />
             )}
           </div>
 
