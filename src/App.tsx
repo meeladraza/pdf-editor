@@ -17,13 +17,14 @@ import { McbIslamicAccountInfoForm } from "./components/McbIslamicAccountInfoFor
 import { BankAlHabibAccountInfoForm } from "./components/BankAlHabibAccountInfoForm";
 import { BankAlFalahAccountInfoForm } from "./components/BankAlFalahAccountInfoForm";
 import { HBLAccountInfoForm } from "./components/HBLAccountInfoForm";
+import { BMLAccountInfoForm } from "./components/BMLAccountInfoForm";
 import { PreviewModal } from "./components/PreviewModal";
 import {
   TransactionRow, FaisalTransactionRow,
   UBLAccountInfo, FaisalAccountInfo, MeezanAccountInfo,
   MetroAccountInfo, SonehriAccountInfo, DubaiIslamicAccountInfo,
   McbIslamicAccountInfo, BankAlHabibAccountInfo, BankAlFalahAccountInfo,
-  HBLAccountInfo, BankType,
+  HBLAccountInfo, BMLAccountInfo, BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
 import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
@@ -35,6 +36,7 @@ import { generateMcbIslamicHTML } from "./utils/mcbIslamicHtmlGenerator";
 import { generateBankAlHabibHTML } from "./utils/bankAlHabibHtmlGenerator";
 import { generateBankAlFalahHTML } from "./utils/bankAlFalahHtmlGenerator";
 import { generateHBLHTML } from "./utils/hblHtmlGenerator";
+import { generateBMLHTML } from "./utils/bmlHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -57,6 +59,7 @@ function App() {
   const [alhabibTransactions, setAlhabibTransactions] = useState<TransactionRow[]>([]);
   const [alfalahTransactions, setAlfalahTransactions] = useState<TransactionRow[]>([]);
   const [hblTransactions, setHblTransactions] = useState<TransactionRow[]>([]);
+  const [bmlTransactions, setBmlTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
 
@@ -185,6 +188,25 @@ function App() {
     bookingDate: "20",
   });
 
+  const [bmlAccountInfo, setBmlAccountInfo] = useState<BMLAccountInfo>({
+    branchName:     "II Chundrigar Road Br,Khi(IBB)",
+    branchAddress:  "Business & Finance Centre, Opposite State Bankof Pakistan, Karachi",
+    accountTitle:   "S.K.F. COLLECTION",
+    address1:       "SECTOR 16/1, SECTOR 12-D",
+    address2:       "NORTH KARACHI",
+    address3:       "INDUSTRIALAREA KARACHI.",
+    refNo:          "ICR\\1",
+    accountNo:      "01990326001714103386",
+    iban:           "PK77SUMB9903207140103386",
+    acProduct:      "CURRENT ACCOUNT",
+    currency:       "PAKISTANI RUPEE",
+    oldAccountNo:   "01990326001714103386",
+    fromDate:       "01-Mar-2025",
+    toDate:         "30-Sep-2025",
+    openingBalance: "299,065.58",
+    runBy:          "akhtarshafi",
+  });
+
   const [hblAccountInfo, setHblAccountInfo] = useState<HBLAccountInfo>({
     branchName: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
     accountHolderName: "RADIUM SILK FACTORY",
@@ -228,6 +250,7 @@ function App() {
     setAlhabibTransactions([]);
     setAlfalahTransactions([]);
     setHblTransactions([]);
+    setBmlTransactions([]);
     setHtmlContent("");
   };
 
@@ -242,6 +265,7 @@ function App() {
     else if (selectedBank === "alhabib") setAlhabibTransactions(data as TransactionRow[]);
     else if (selectedBank === "alfalah") setAlfalahTransactions(data as TransactionRow[]);
     else if (selectedBank === "hbl")     setHblTransactions(data as TransactionRow[]);
+    else if (selectedBank === "bml")     setBmlTransactions(data as TransactionRow[]);
   };
 
   const handleGeneratePreview = async () => {
@@ -266,6 +290,8 @@ function App() {
       html = await generateBankAlFalahHTML(alfalahTransactions, alfalahAccountInfo);
     else if (selectedBank === "hbl" && hblTransactions.length > 0)
       html = await generateHBLHTML(hblTransactions, hblAccountInfo);
+    else if (selectedBank === "bml" && bmlTransactions.length > 0)
+      html = await generateBMLHTML(bmlTransactions, bmlAccountInfo);
 
     if (html) { setHtmlContent(html); setIsModalOpen(true); }
     else alert("Please upload an Excel file first");
@@ -286,7 +312,8 @@ function App() {
                 selectedBank === "mcb" ? mcbTransactions.length > 0 :
                   selectedBank === "alhabib" ? alhabibTransactions.length > 0 :
                     selectedBank === "alfalah" ? alfalahTransactions.length > 0 :
-                      hblTransactions.length > 0;
+                      selectedBank === "hbl" ? hblTransactions.length > 0 :
+                        bmlTransactions.length > 0;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -373,7 +400,7 @@ function App() {
 
         {/* Sidebar footer */}
         <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-          <p className="text-[10px] text-slate-400 text-center">10 bank templates · A4 PDF export</p>
+          <p className="text-[10px] text-slate-400 text-center">11 bank templates · A4 PDF export</p>
         </div>
       </aside>
 
@@ -414,8 +441,10 @@ function App() {
               <BankAlHabibAccountInfoForm accountInfo={alhabibAccountInfo} onChange={setAlhabibAccountInfo} />
             ) : selectedBank === "alfalah" ? (
               <BankAlFalahAccountInfoForm accountInfo={alfalahAccountInfo} onChange={setAlfalahAccountInfo} />
-            ) : (
+            ) : selectedBank === "hbl" ? (
               <HBLAccountInfoForm accountInfo={hblAccountInfo} onChange={setHblAccountInfo} />
+            ) : (
+              <BMLAccountInfoForm accountInfo={bmlAccountInfo} onChange={setBmlAccountInfo} />
             )}
           </div>
 

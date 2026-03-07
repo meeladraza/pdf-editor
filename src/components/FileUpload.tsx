@@ -11,6 +11,7 @@ import { parseMcbIslamicExcelFile } from '../utils/mcbIslamicExcelParser';
 import { parseBankAlHabibExcelFile } from '../utils/bankAlHabibExcelParser';
 import { parseBankAlFalahExcelFile } from '../utils/bankAlFalahExcelParser';
 import { parseHBLExcelFile } from '../utils/hblExcelParser';
+import { parseBMLExcelFile } from '../utils/bmlExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -39,7 +40,8 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
       else if (bankType === 'mcb')     transactions = await parseMcbIslamicExcelFile(file);
       else if (bankType === 'alhabib') transactions = await parseBankAlHabibExcelFile(file);
       else if (bankType === 'alfalah') transactions = await parseBankAlFalahExcelFile(file);
-      else                             transactions = await parseHBLExcelFile(file);
+      else if (bankType === 'hbl')     transactions = await parseHBLExcelFile(file);
+      else                             transactions = await parseBMLExcelFile(file);
 
       setUploadedFileName(file.name);
       onDataLoaded(transactions);

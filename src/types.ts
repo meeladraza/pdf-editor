@@ -1,4 +1,4 @@
-export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl";
+export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl" | "bml";
 
 export interface TransactionRow {
   date: string;
@@ -180,4 +180,23 @@ export interface DubaiIslamicAccountInfo {
   branch: string;
   openingBal: string;
   runDate: string;
+}
+
+export interface BMLAccountInfo {
+  branchName: string;
+  branchAddress: string;
+  accountTitle: string;
+  address1: string;
+  address2: string;
+  address3: string;
+  refNo: string;
+  accountNo: string;
+  iban: string;
+  acProduct: string;
+  currency: string;
+  oldAccountNo: string;
+  fromDate: string;
+  toDate: string;
+  openingBalance: string;
+  runBy: string;
 }
