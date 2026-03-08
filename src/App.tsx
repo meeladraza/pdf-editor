@@ -259,13 +259,6 @@ function App() {
     toDate:           "04-Mar-2026",
     openingBalance:   "PKR 1,970,265.83",
     printedBy:        "FW9806 on 3/4/2026 2:02 PM",
-    debitCount:       "06",
-    creditCount:      "15",
-    totalDebit:       "4,702,320.00",
-    totalCredit:      "2,966,600.00",
-    closingDate:      "04-Mar-2026",
-    closingBalance:   "234,545.83",
-    availableBalance: "234,545.83",
   });
 
   // ── Handlers ────────────────────────────────────────────────────────────────

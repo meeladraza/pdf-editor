@@ -201,13 +201,6 @@ export interface BankIslamiAccountInfo {
   toDate: string;
   openingBalance: string;
   printedBy: string;
-  debitCount: string;
-  creditCount: string;
-  totalDebit: string;
-  totalCredit: string;
-  closingDate: string;
-  closingBalance: string;
-  availableBalance: string;
 }
 
 export interface BMLAccountInfo {

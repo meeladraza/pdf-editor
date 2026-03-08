@@ -205,26 +205,33 @@ const generateHeader = (info: BankIslamiAccountInfo, isFirstPage: boolean) => `
 `;
 
 // ── Summary section (last page) ───────────────────────────────────────────────
-const generateSummary = (info: BankIslamiAccountInfo) => `
+const generateSummary = (
+  info: BankIslamiAccountInfo,
+  debitCount: number,
+  creditCount: number,
+  totalDebit: string,
+  totalCredit: string,
+  closingBalance: string,
+) => `
   <div style="display: flex; flex-direction: column; align-items: center; ${FONT} font-size:8.5pt; padding:40px 20px 0 8px; color:#000; border-top: 1px solid #000;">
-  <div> 
+  <div>
     <div style="display:flex; gap:80px; margin-bottom:4px;">
-      <div><strong>DEBIT TRANSACTIONS COUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;</strong>${info.debitCount}</div>
-      <div><strong>TOTAL DEBIT AMOUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;</strong>${info.totalDebit}</div>
+      <div><strong>DEBIT TRANSACTIONS COUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;</strong>${debitCount}</div>
+      <div><strong>TOTAL DEBIT AMOUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;</strong>${totalDebit}</div>
     </div>
     <div style="display:flex; gap:80px; margin-bottom:20px;">
-      <div><strong>CREDIT TRANSACTIONS COUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>${info.creditCount}</div>
-      <div><strong>TOTAL CREDIT AMOUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;</strong>${info.totalCredit}</div>
+      <div><strong>CREDIT TRANSACTIONS COUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>${creditCount}</div>
+      <div><strong>TOTAL CREDIT AMOUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;</strong>${totalCredit}</div>
     </div>
     </div>
     <div>
     <div style="display:flex; gap:20px; margin-bottom:4px; font-weight:bold;">
       <div style="min-width:115px;">CLOSING BALANCE</div>
-      <div>&nbsp;&nbsp;as on &nbsp;${info.closingDate} &nbsp;&nbsp;${info.closingBalance}</div>
+      <div>&nbsp;&nbsp;as on &nbsp;${info.toDate} &nbsp;&nbsp;${closingBalance}</div>
     </div>
     <div style="display:flex; gap:20px; font-weight:bold;">
       <div style="min-width:115px;">AVAILABLE BALANCE</div>
-      <div>as on &nbsp;${info.closingDate} &nbsp;&nbsp;${info.availableBalance}</div>
+      <div>as on &nbsp;${info.toDate} &nbsp;&nbsp;${closingBalance}</div>
     </div>
     </div>
   </div>
@@ -248,6 +255,18 @@ export const generateBankIslamiHTML = async (
   const txPages    = paginateByMeasuredHeight(transactions, measuredHeights);
   const totalPages = txPages.length;
 
+  // ── Computed summary values ──────────────────────────────────────────────────
+  const parseAmt = (s: string) => parseFloat(s.replace(/,/g, "")) || 0;
+  const fmtAmt   = (n: number) =>
+    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const debitCount    = transactions.filter((t) => t.debit).length;
+  const creditCount   = transactions.filter((t) => t.credit).length;
+  const totalDebit    = fmtAmt(transactions.reduce((s, t) => s + parseAmt(t.debit),  0));
+  const totalCredit   = fmtAmt(transactions.reduce((s, t) => s + parseAmt(t.credit), 0));
+  const lastTx        = transactions[transactions.length - 1];
+  const closingBalance = lastTx?.balance ?? "";
+
   const pagesHtml = txPages.map((rows, idx) => {
     const isFirstPage = idx === 0;
     const isLastPage  = idx === txPages.length - 1;
@@ -265,7 +284,7 @@ export const generateBankIslamiHTML = async (
             </tbody>
           </table>
         </div>
-        ${isLastPage ? generateSummary(info) : ""}
+        ${isLastPage ? generateSummary(info, debitCount, creditCount, totalDebit, totalCredit, closingBalance) : ""}
         <div style="flex:1;"></div>
         <div style="flex-shrink:0;">
           ${generateFooter(pageNum, totalPages, info.printedBy)}

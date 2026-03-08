@@ -45,19 +45,6 @@ export const BankIslamiAccountInfoForm = ({ accountInfo, onChange }: Props) => {
         {input("To Date",          "toDate",          "04-Mar-2026")}
         {input("Opening Balance",  "openingBalance",  "PKR 1,970,265.83", true)}
         {input("Printed By",       "printedBy",       "FW9806 on 3/4/2026 2:02 PM", true)}
-
-        <div className="md:col-span-2 border-t pt-4 mt-2">
-          <p className="text-sm font-semibold text-gray-600 mb-3">Summary (Last Page)</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {input("Debit Transactions Count",  "debitCount",       "06")}
-            {input("Total Debit Amount",        "totalDebit",       "4,702,320.00")}
-            {input("Credit Transactions Count", "creditCount",      "15")}
-            {input("Total Credit Amount",       "totalCredit",      "2,966,600.00")}
-            {input("Closing Date",              "closingDate",      "04-Mar-2026")}
-            {input("Closing Balance",           "closingBalance",   "234,545.83")}
-            {input("Available Balance",         "availableBalance", "234,545.83")}
-          </div>
-        </div>
       </div>
     </div>
   );
