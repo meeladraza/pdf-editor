@@ -18,6 +18,7 @@ const BANKS: { id: BankType; short: string; label: string }[] = [
   { id: 'hbl',     short: 'HBL',     label: 'Habib Bank' },
   { id: 'bml',        short: 'BML', label: 'Bank Makramah' },
   { id: 'bankislami', short: 'BKI', label: 'Bank Islami' },
+  { id: 'mcbbank',    short: 'MCB', label: 'MCB Bank' },
 ];
 
 export const BankSelector = ({ selectedBank, onBankChange }: BankSelectorProps) => {

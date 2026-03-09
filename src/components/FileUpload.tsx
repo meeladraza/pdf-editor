@@ -13,6 +13,7 @@ import { parseBankAlFalahExcelFile } from '../utils/bankAlFalahExcelParser';
 import { parseHBLExcelFile } from '../utils/hblExcelParser';
 import { parseBMLExcelFile } from '../utils/bmlExcelParser';
 import { parseBankIslamiExcelFile } from '../utils/bankIslamiExcelParser';
+import { parseMCBExcelFile } from '../utils/mcbExcelParser';
 
 interface FileUploadProps {
   onDataLoaded: (transactions: TransactionRow[] | FaisalTransactionRow[]) => void;
@@ -43,6 +44,7 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
       else if (bankType === 'alfalah') transactions = await parseBankAlFalahExcelFile(file);
       else if (bankType === 'hbl')        transactions = await parseHBLExcelFile(file);
       else if (bankType === 'bankislami') transactions = await parseBankIslamiExcelFile(file);
+      else if (bankType === 'mcbbank')    transactions = await parseMCBExcelFile(file);
       else                               transactions = await parseBMLExcelFile(file);
 
       setUploadedFileName(file.name);
