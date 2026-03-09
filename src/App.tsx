@@ -70,21 +70,23 @@ function App() {
   const [mcbBankTransactions, setMcbBankTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountSelectorOpen, setIsAccountSelectorOpen] = useState(false);
-  const [activeProfileId, setActiveProfileId] = useState<string>(
-    () => bankAccountProfiles["ubl"]?.[0]?.id ?? ""
+  const [activeProfileIds, setActiveProfileIds] = useState<Record<string, string>>(
+    () => Object.fromEntries(
+      Object.entries(bankAccountProfiles).map(([bank, profiles]) => [bank, profiles[0]?.id ?? ""])
+    )
   );
   const [htmlContent, setHtmlContent] = useState<string>("");
 
   // ── Account info state ──────────────────────────────────────────────────────
   const [ublAccountInfo, setUblAccountInfo] = useState<UBLAccountInfo>({
     branchCode: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
-    accountTitle: "AR INDUSTRIES",
-    address1: "PLOT NO L-18 BLOCK NO 22",
-    address2: "F. B AREA KARACHI KARACHI",
-    address3: "KARACHI",
+    accountTitle: "SKF COLLECTION",
+    address1: "PLOT NO 16/1, SECTOR 12-D NORTH",
+    address2: "KARACHI INDUSTRIAL",
+    address3: "AREA, KARACHI, PAKISTAN",
     regCellNo: "03219216849",
-    ibanNo: "PK55 UNIL 0109 0003 0116 5884",
-    cifNo: "22249075",
+    ibanNo: "PK28 UNIL 0112 0004 9840 0782",
+    cifNo: "30973783",
     statementPeriod: "From 01-OCT-2025 To 13-OCT-2025",
     accountNo: "000498400782",
     accountType: "SAVING",
@@ -123,7 +125,7 @@ function App() {
   const [meezanAccountInfo, setMeezanAccountInfo] = useState<MeezanAccountInfo>({
     branchName: "0110-CLOTH MARKET-KARACHI",
     branchAddress: "14, ATIQUE MARKET, BUNDER QUARTER, KARACHI",
-    accountTitle: "SK COLLECTION",
+    accountTitle: "SKF COLLECTION",
     address: "PLOT NO, 16/1, SECTOR 12-D, NORTH",
     address2: "KARACHI, KARACHI, (0311-8266060)",
     printDate: "22 OCT 2025 14:20:09",
@@ -309,14 +311,13 @@ function App() {
     else if (selectedBank === "bml")        apply(setBmlAccountInfo);
     else if (selectedBank === "bankislami") apply(setBankIslamiAccountInfo);
     else if (selectedBank === "mcbbank")    apply(setMcbBankAccountInfo);
-    setActiveProfileId(profile.id);
+    setActiveProfileIds(prev => ({ ...prev, [selectedBank]: profile.id }));
     setIsAccountSelectorOpen(false);
   };
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleBankChange = (bank: BankType) => {
     setSelectedBank(bank);
-    setActiveProfileId(bankAccountProfiles[bank]?.[0]?.id ?? "");
     setUblTransactions([]);
     setFaisalTransactions([]);
     setMeezanTransactions([]);
@@ -593,7 +594,7 @@ function App() {
         onClose={() => setIsAccountSelectorOpen(false)}
         profiles={bankAccountProfiles[selectedBank] ?? []}
         onSelect={handleSelectProfile}
-        activeProfileId={activeProfileId}
+        activeProfileId={activeProfileIds[selectedBank] ?? ""}
       />
     </div>
   );

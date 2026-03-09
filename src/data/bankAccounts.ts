@@ -41,7 +41,27 @@ export interface AccountProfile {
 
 export const bankAccountProfiles: Record<string, AccountProfile[]> = {
   ubl: [
+ 
     {
+      id: "ubl-2",
+      label: "SKF COLLECTION",
+      subtitle: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
+      data: {
+        branchCode: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
+        accountTitle: "SKF COLLECTION",
+        address1: "PLOT NO 16/1, SECTOR 12-D NORTH",
+        address2: "KARACHI INDUSTRIAL",
+        address3: "AREA, KARACHI, PAKISTAN",
+        regCellNo: "03219216849",
+        ibanNo: "PK28 UNIL 0112 0004 9840 0782",
+        cifNo: "30973783",
+        accountNo: "000498400782",
+        accountType: "SAVING",
+        productType: "AMEEN BUSINESS ACCOUNT (ABA)",
+        currency: "PAKISTANI RUPEE",
+      },
+    },
+       {
       id: "ubl-1",
       label: "AR INDUSTRIES",
       subtitle: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
@@ -82,12 +102,12 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
   meezan: [
     {
       id: "meezan-2",
-      label: "SK COLLECTION",
+      label: "SKF COLLECTION",
       subtitle: "0110-CLOTH MARKET-KARACHI",
       data: {
         branchName: "0110-CLOTH MARKET-KARACHI",
         branchAddress: "14, ATIQUE MARKET, BUNDER QUARTER, KARACHI",
-        accountTitle: "SK COLLECTION",
+        accountTitle: "SKF COLLECTION",
         address: "PLOT NO, 16/1, SECTOR 12-D, NORTH",
         address2: "KARACHI, KARACHI, (0311-8266060)",
         iban: "PK07MEZN0001100100604463",
