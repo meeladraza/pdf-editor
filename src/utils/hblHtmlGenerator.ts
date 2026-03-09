@@ -3,19 +3,23 @@ import { TransactionRow, HBLAccountInfo } from "../types";
 const FONT = "font-family: Arial, sans-serif;";
 
 // ── Pagination constants ──────────────────────────────────────────────────────
-const A4_HEIGHT_PX   = 1123;
-const FOOTER_IMG_PX  = 390   // height of footer-logo.png (Important Notes section)
-const ROW_HEIGHT_PX  = 20;    // fallback row height
+const A4_HEIGHT_PX    = 1123;
+const FOOTER_IMG_PX   = 390;  // footer image + padding
+const ROW_HEIGHT_PX   = 20;   // fallback row height
+const CARRIED_FWD_PX  = 20;   // "CARRIED FORWARD" row added to every page
+const END_STMT_PX     = 20;   // "** End of Statement **" row added to last page only
 
 // Page 1: logo+heading + branch/date row + account holder/info + slogan + table-header
-const P1_TOP_PX      = 267;
-const P1_TBL_HDR_PX  = 32;
+const P1_TOP_PX       = 267;
+const P1_TBL_HDR_PX   = 32;
 // Pages 2+: logo + account-info rows + slogan + table-header
-const REST_TOP_PX    = 220;
+const REST_TOP_PX     = 220;
 const REST_TBL_HDR_PX = 32;
 
-const AVAIL_P1   = A4_HEIGHT_PX - P1_TOP_PX   - P1_TBL_HDR_PX   - FOOTER_IMG_PX;
-const AVAIL_REST = A4_HEIGHT_PX - REST_TOP_PX  - REST_TBL_HDR_PX - FOOTER_IMG_PX;
+const AVAIL_P1        = A4_HEIGHT_PX - P1_TOP_PX   - P1_TBL_HDR_PX   - FOOTER_IMG_PX - CARRIED_FWD_PX;
+const AVAIL_REST      = A4_HEIGHT_PX - REST_TOP_PX  - REST_TBL_HDR_PX - FOOTER_IMG_PX - CARRIED_FWD_PX;
+const AVAIL_P1_LAST   = AVAIL_P1   - END_STMT_PX;
+const AVAIL_REST_LAST = AVAIL_REST - END_STMT_PX;
 
 // ── Table header ──────────────────────────────────────────────────────────────
 const TH = `${FONT} font-size: 8pt; font-weight: bold; background: #d3d3d3; padding: 8px 6px 2px 6px; border: 2px solid #000; text-align: center; color: #000;`;
@@ -75,24 +79,37 @@ const paginateByMeasuredHeight = (
   heights: number[],
 ): TransactionRow[][] => {
   const pages: TransactionRow[][] = [];
-  let current: TransactionRow[] = [];
-  let usedPx    = 0;
-  let firstPage = true;
+  const remaining  = rows.slice();
+  const remHeights = heights.slice();
+  let firstPage    = true;
 
-  rows.forEach((row, i) => {
-    const limit = firstPage ? AVAIL_P1 : AVAIL_REST;
-    const rowH  = heights[i] ?? ROW_HEIGHT_PX;
-    if (usedPx + rowH > limit && current.length > 0) {
-      pages.push(current);
-      current   = [];
-      usedPx    = 0;
-      firstPage = false;
+  const fillPage = (limit: number): TransactionRow[] => {
+    const page: TransactionRow[] = [];
+    let used = 0;
+    while (remaining.length > 0 && used + (remHeights[0] ?? ROW_HEIGHT_PX) <= limit) {
+      page.push(remaining.shift()!);
+      used += remHeights.shift()!;
     }
-    current.push(row);
-    usedPx += rowH;
-  });
+    if (page.length === 0 && remaining.length > 0) {
+      page.push(remaining.shift()!);
+      remHeights.shift();
+    }
+    return page;
+  };
 
-  if (current.length > 0) pages.push(current);
+  while (remaining.length > 0) {
+    const remTotal  = remHeights.reduce((s, h) => s + h, 0);
+    const lastLimit = firstPage ? AVAIL_P1_LAST : AVAIL_REST_LAST;
+    const midLimit  = firstPage ? AVAIL_P1      : AVAIL_REST;
+
+    if (remTotal <= lastLimit) {
+      pages.push(remaining.splice(0));
+      break;
+    }
+    pages.push(fillPage(midLimit));
+    firstPage = false;
+  }
+
   if (pages.length === 0) pages.push([]);
   return pages;
 };
@@ -186,6 +203,36 @@ const generateRestHeader = (
   </div>
 `;
 
+// ── Special rows ──────────────────────────────────────────────────────────────
+const TD_SPEC = `${FONT} font-size: 8pt; padding: 0px 8px; border-right: 2px solid #000; border-left: 2px solid #000; vertical-align: top; color: #000; line-height: 1.5;`;
+
+const generateCarriedForwardRow = (balance: string) => `
+  <tr>
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC}">CARRIED FORWARD</td>
+    <td style="${TD_SPEC} text-align:right;"></td>
+    <td style="${TD_SPEC} text-align:right;"></td>
+    <td style="${TD_SPEC} text-align:right;">${balance ? `${balance}CR` : ""}</td>
+  </tr>`;
+
+const generateEndOfStatementRow = () => `
+  <tr>
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC} text-align:center;">** End of Statement **</td>
+    <td style="${TD_SPEC} text-align:right;"></td>
+    <td style="${TD_SPEC} text-align:right;"></td>
+    <td style="${TD_SPEC} text-align:right;"></td>
+  </tr>`;
+
+const generateFillerRow = () => `
+  <tr style="height:100%;">
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC}"></td>
+    <td style="${TD_SPEC}"></td>
+  </tr>`;
+
 // ── Footer image ──────────────────────────────────────────────────────────────
 const generateFooter = () => `
   <div style="padding: 0 30px 40px 16px; flex-shrink:0;">
@@ -205,20 +252,27 @@ export const generateHBLHTML = async (
 
   const pagesHtml = txPages.map((rows, idx) => {
     const isFirstPage = idx === 0;
+    const isLastPage  = idx === txPages.length - 1;
     const pageNum     = idx + 1;
     const header = isFirstPage
       ? generatePage1Header(info, pageNum, totalPages)
       : generateRestHeader(info, pageNum, totalPages);
 
+    const lastBalance = rows[rows.length - 1]?.balance ?? "";
+
     return `
       <div style="display:flex; flex-direction:column; height:${A4_HEIGHT_PX}px; overflow:hidden;
                   page-break-before:${isFirstPage ? "auto" : "always"};">
         ${header}
-        <div style="flex:1; min-height:0; overflow:hidden; padding:0 30px 20px 16px;">
-          <table style="width:100%; border-collapse:collapse;">
+        <div style="flex:1; min-height:0; padding:0 30px 0 16px; display:flex; flex-direction:column;">
+          <table style="width:100%; border-collapse:collapse; flex:1; height:100%;">
             ${generateTableHeader()}
             <tbody>
               ${rows.map(generateRow).join("")}
+              ${isLastPage ? generateCarriedForwardRow(lastBalance) : ""}
+              ${isLastPage ? generateEndOfStatementRow() : ""}
+              ${generateFillerRow()}
+              ${!isLastPage ? generateCarriedForwardRow(lastBalance) : ""}
             </tbody>
           </table>
         </div>
