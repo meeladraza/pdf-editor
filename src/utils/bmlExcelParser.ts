@@ -3,19 +3,40 @@ import { TransactionRow } from "../types";
 
 // BML columns: Date | Value Date | Particulars | Instrument | Debit | Credit | Day-end Balance
 
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const toDisplayDate = (d: number, m: number, y: number): string =>
+  `${String(d).padStart(2, "0")}-${MON[m]}-${y}`;
+
 const formatDate = (val: any): string => {
   if (!val) return "";
   const s = String(val).trim();
   if (!s) return "";
+
+  // Numeric Excel serial
   if (typeof val === "number" && val > 25568) {
-    const epoch = new Date(1899, 11, 30);
-    const date  = new Date(epoch.getTime() + val * 86400 * 1000);
-    if (!isNaN(date.getTime())) {
-      const d   = date.getDate().toString().padStart(2, "0");
-      const mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      return `${d}-${mon[date.getMonth()]}-${date.getFullYear()}`;
-    }
+    const date = new Date(new Date(1899, 11, 30).getTime() + val * 86400 * 1000);
+    if (!isNaN(date.getTime()))
+      return toDisplayDate(date.getDate(), date.getMonth(), date.getFullYear());
   }
+
+  // Already DD-Mon-YYYY (e.g. "10-Apr-2025")
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) return s;
+
+  // DD/MM/YYYY or D/M/YYYY
+  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmy) {
+    const m = parseInt(dmy[2]) - 1;
+    if (m >= 0 && m <= 11) return toDisplayDate(parseInt(dmy[1]), m, parseInt(dmy[3]));
+  }
+
+  // YYYY-MM-DD (ISO)
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    const m = parseInt(iso[2]) - 1;
+    if (m >= 0 && m <= 11) return toDisplayDate(parseInt(iso[3]), m, parseInt(iso[1]));
+  }
+
   return s;
 };
 
