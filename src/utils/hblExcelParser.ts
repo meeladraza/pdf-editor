@@ -70,7 +70,7 @@ export const parseHBLExcelFile = (file: File): Promise<TransactionRow[]> => {
             particulars:      description,
             debit:            row[3] ? cleanNumber(row[3]) : "",
             credit:           row[4] ? cleanNumber(row[4]) : "",
-            balance:          row[5] ? String(row[5]).trim() : "",
+            balance:          row[5] ? cleanNumber(row[5]) : "",
             isOpeningBalance: isOpening,
             isClosingBalance: isClosing,
           });
