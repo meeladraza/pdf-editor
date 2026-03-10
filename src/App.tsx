@@ -223,15 +223,15 @@ function App() {
 
   const [hblAccountInfo, setHblAccountInfo] = useState<HBLAccountInfo>({
     branchName: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
-    accountHolderName: "RADIUM SILK FACTORY",
-    address1: "PLOT NO.18/1/4 BLOCK NO.22",
-    address2: "INDUSTRIAL AREA F.B.AREA",
+    accountHolderName: "SKF COLLECTION",
+    address1: "PLOT NO.16/1, SECTOR12-D, NORTH KARACHI",
+    address2: "INDUSTRIAL AREA",
     address3: "KARACHI",
     date: "24 Nov 2025",
     accountType: "ISLAMIC CURRENT ACCOUNT",
-    accountNo: "0004*******61-03",
+    accountNo: "0004*******60-03",
     currency: "Pakistan Rupee",
-    iban: "PK03 **** **** **** 6103",
+    iban: "PK84 **** **** **** 6003",
   });
 
   const [alhabibAccountInfo, setAlhabibAccountInfo] = useState<BankAlHabibAccountInfo>({

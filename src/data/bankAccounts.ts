@@ -41,7 +41,6 @@ export interface AccountProfile {
 
 export const bankAccountProfiles: Record<string, AccountProfile[]> = {
   ubl: [
- 
     {
       id: "ubl-2",
       label: "SKF COLLECTION",
@@ -61,7 +60,7 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
         currency: "PAKISTANI RUPEE",
       },
     },
-       {
+    {
       id: "ubl-1",
       label: "AR INDUSTRIES",
       subtitle: "0004-AMEEN SALEH MUHAMMAD ST. KHI",
@@ -255,6 +254,22 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
   hbl: [
     {
       id: "hbl-1",
+      label: "SKF COLLECTION",
+      subtitle: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
+      data: {
+        branchName: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
+        accountHolderName: "SKF COLLECTION",
+        address1: "PLOT NO.16/1, SECTOR12-D, NORTH KARACHI",
+        address2: "INDUSTRIAL AREA",
+        address3: "KARACHI",
+        accountType: "ISLAMIC CURRENT ACCOUNT",
+        accountNo: "0004*******60-03",
+        currency: "Pakistan Rupee",
+        iban: "PK84 **** **** **** 6003",
+      },
+    },
+    {
+      id: "hbl-2",
       label: "RADIUM SILK FACTORY",
       subtitle: "BAITUL HAMDM.A.JINNAH RD. KARACHI",
       data: {
