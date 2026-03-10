@@ -21,6 +21,29 @@ const AVAIL_REST      = A4_HEIGHT_PX - REST_TOP_PX  - REST_TBL_HDR_PX - FOOTER_I
 const AVAIL_P1_LAST   = AVAIL_P1   - END_STMT_PX;
 const AVAIL_REST_LAST = AVAIL_REST - END_STMT_PX;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const MON_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const fmt2dec = (val: string): string => {
+  if (!val) return "";
+  const n = parseFloat(val.replace(/,/g, ""));
+  if (isNaN(n)) return val;
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const fmtDate = (date: string): string => {
+  if (!date) return date;
+  const s = date.trim();
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) return s;
+  const sp = s.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (sp) return `${sp[1].padStart(2, "0")}-${sp[2]}-${sp[3]}`;
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) { const m = parseInt(iso[2]) - 1; if (m >= 0 && m <= 11) return `${iso[3]}-${MON_SHORT[m]}-${iso[1]}`; }
+  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmy) { const m = parseInt(dmy[2]) - 1; if (m >= 0 && m <= 11) return `${dmy[1].padStart(2,"0")}-${MON_SHORT[m]}-${dmy[3]}`; }
+  return s;
+};
+
 // ── Table header ──────────────────────────────────────────────────────────────
 const TH = `${FONT} font-size: 8pt; font-weight: bold; background: #d3d3d3; padding: 8px 6px 2px 6px; border: 2px solid #000; text-align: center; color: #000;`;
 
@@ -47,9 +70,9 @@ const generateRow = (tx: TransactionRow) => {
   <tr>
     <td style="${TD} ${bold}">${tx.date}</td>
     <td style="${TD} ${bold}">${tx.particulars.replace(/\n/g, "<br>")}</td>
-    <td style="${TD_NUM} ${bold}">${tx.debit || ""}</td>
-    <td style="${TD_NUM} ${bold}">${tx.credit || ""}</td>
-    <td style="${TD_NUM} ${bold}">${tx.balance ? `${tx.balance}CR` : ""}</td>
+    <td style="${TD_NUM} ${bold}">${fmt2dec(tx.debit)}</td>
+    <td style="${TD_NUM} ${bold}">${fmt2dec(tx.credit)}</td>
+    <td style="${TD_NUM} ${bold}">${tx.balance ? `${fmt2dec(tx.balance)}CR` : ""}</td>
   </tr>`;
 };
 
@@ -142,7 +165,7 @@ const generatePage1Header = (
         <div style="font-weight:bold;">${info.address3}</div>
       </div>
       <div style="min-width:310px;">
-      <div style="display:flex; font-weight:bold;"><span style="width:100px;">Date :</span><span>${info.date}</span></div>
+      <div style="display:flex; font-weight:bold;"><span style="width:100px;">Date :</span><span>${fmtDate(info.date)}</span></div>
         <div style="display:flex; font-weight:bold; margin-top:4px;"><span style="width:100px;">Page No:</span><span>Page ${pageNum} of ${totalPages}</span></div>
         <div style="display:flex; font-weight:bold; margin-top:4px;"><span style="width:100px;">Account Type:</span><span>${info.accountType}</span></div>
         <div style="display:flex; font-weight:bold; margin-top:4px;"><span style="width:100px;">Account No.:</span><span>${info.accountNo}</span></div>
@@ -187,7 +210,7 @@ const generateRestHeader = (
        <div style="display:flex; flex-direction:column; gap: 4px;">
         <div style="display:flex; align-items: center;">
           <span style="width: 90px;">Date:</span>
-          <span>${info.date}</span>
+          <span>${fmtDate(info.date)}</span>
         </div>
         <div style="display:flex; align-items: center;">
           <span style="width: 90px;">Page No:</span>
