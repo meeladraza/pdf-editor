@@ -23,11 +23,19 @@ const formatDate = (val: any): string => {
 
 const cleanNumber = (val: any): string => {
   if (!val && val !== 0) return "";
-  const s = String(val).trim().replace(/,/g, "");
-  if (!s || isNaN(Number(s))) return String(val).trim();
-  return Number(s).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-};
 
+  const s = String(val)
+    .trim()
+    .replace(/,/g, "")
+    .replace("-", ""); // remove minus sign
+
+  if (!s || isNaN(Number(s))) return String(val).trim().replace("-", "");
+
+  return Number(s).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
 export const parseHBLExcelFile = (file: File): Promise<TransactionRow[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
