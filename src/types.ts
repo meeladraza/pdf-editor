@@ -138,6 +138,8 @@ export interface BankAlHabibAccountInfo {
   accountName: string;
   address1: string;
   address2: string;
+  address3: string;
+  address4: string;
   accountNo: string;
   accountType: string;
   currency: string;

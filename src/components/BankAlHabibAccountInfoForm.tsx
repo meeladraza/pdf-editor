@@ -62,7 +62,11 @@ export const BankAlHabibAccountInfoForm = ({ accountInfo, onChange }: Props) => 
         </div>
         <div className="md:col-span-2">
           <label className={labelClass}>Address Line 3</label>
-          <input type="text" value={accountInfo.address3} onChange={(e) => handleChange("address3", e.target.value)} className={inputClass} placeholder="KARACHI - PAKISTAN" />
+          <input type="text" value={accountInfo.address3} onChange={(e) => handleChange("address3", e.target.value)} className={inputClass} placeholder="KARACHI" />
+        </div>
+        <div className="md:col-span-2">
+          <label className={labelClass}>Address Line 4</label>
+          <input type="text" value={accountInfo.address4} onChange={(e) => handleChange("address4", e.target.value)} className={inputClass} placeholder="KARACHI - PAKISTAN" />
         </div>
         <div>
           <label className={labelClass}>Account Type</label>

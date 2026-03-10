@@ -220,6 +220,26 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
   alhabib: [
     {
       id: "alhabib-1",
+      label: "SKF COLLECTION",
+      subtitle: "BOULTON MARKET BRANCH - 1089",
+      data: {
+        branchCode: "1011",
+        branchName: "BOULTON MARKET BRANCH - 1089",
+        branchAddress: "LOTIA HOUSE BUILDING SERIA QUARTER KARACHI PAKISTAN",
+        accountName: "SKF COLLECTION",
+        address1: "PLT NO 16/1, SECTOR 12-D",
+        address2: "NORTH KARACHI INDUSTRIAL AREA",
+        address3: "KARACHI",
+        address4: "KARACHI - PAKISTAN",
+        accountNo: "5008-0115-XXXXXX-00-1",
+        accountType: "AL HABIB CURNT",
+        currency: "PAKISTANI RUPEES",
+        qrText: "5008-0115-XXXXXX-00-1",
+        qrSubText: "SKF COLLECTION - 6101",
+      },
+    },
+    {
+      id: "alhabib-2",
       label: "A R INDUSTRIES",
       subtitle: "CLOTH MARKET BRANCH - 1011",
       data: {
@@ -228,7 +248,9 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
         branchAddress: "NEW NEHAM ROAD, KARACHI, PAKISTAN",
         accountName: "A R INDUSTRIES",
         address1: "PLT NO L-18 BLK # 22 FB AREA",
-        address2: "KARACHI - PAKISTAN",
+        address2: "",
+        address3: "",
+        address4: "KARACHI - PAKISTAN",
         accountNo: "1011-0981-XXXXXX-01-4",
         accountType: "AL HABIB CURNT PLUS",
         currency: "PAKISTANI RUPEES",

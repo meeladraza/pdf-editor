@@ -170,10 +170,10 @@ const generateAccountSection = (info: BankAlHabibAccountInfo) => {
     <div style="display: flex; gap: 20px; margin-top: 6px; ${FONT} font-size: 8pt; padding: 0px 80px 0px 50px;">
       <div style="flex: 1;">
         <div style="display: flex; align-items: center;"><span style="width: 80px">Name:</span> ${info.accountName}</div>
-        <div style="display: flex; align-items: center; margin-top: 6px;"><span style="width: 80px">Address:</span> ${info.address1}</div>
-        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">.</div>
-        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">.</div>
-        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">${info.address2}</div>
+        <div style="display: flex; align-items: center; margin-top: 6px;"><span style="width: 80px">Address:</span> ${info.address1 || '.'}</div>
+        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">${info.address2 || '.'}</div>
+        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">${info.address3 || '.'}</div>
+        <div style="display: flex; align-items: center; margin-top: 6px; padding-left: 80px;">${info.address4 || '.'}</div>
         
       </div>
       <div style="flex: 1;">
