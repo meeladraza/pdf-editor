@@ -3,17 +3,19 @@ import { TransactionRow, MCBAccountInfo } from "../types";
 const FONT = "font-family: Arial, sans-serif;";
 
 // ── Pagination constants ──────────────────────────────────────────────────────
-const A4_HEIGHT_PX  = 1123;
-const P1_TOP_PX     = 258;  // full header with opening balance
-const REST_TOP_PX   = 216;  // full header WITHOUT opening balance (~42px less)
-const TBL_HDR_PX    = 36;   // 11-column header row
-const SUMMARY_PX    = 88;   // summary section (4 left rows + 2 right rows)
-const FOOTER_PX     = 22;   // NOTE + page number
+const A4_HEIGHT_PX = 1123;
+const P1_TOP_PX = 258; // full header with opening balance
+const REST_TOP_PX = 216; // full header WITHOUT opening balance (~42px less)
+const TBL_HDR_PX = 36; // 11-column header row
+const SUMMARY_PX = 88; // summary section (4 left rows + 2 right rows)
+const FOOTER_PX = 22; // NOTE + page number
 
-const AVAIL_P1        = A4_HEIGHT_PX - P1_TOP_PX   - TBL_HDR_PX - FOOTER_PX;
-const AVAIL_REST      = A4_HEIGHT_PX - REST_TOP_PX  - TBL_HDR_PX - FOOTER_PX;
-const AVAIL_LAST_ONLY = A4_HEIGHT_PX - REST_TOP_PX  - TBL_HDR_PX - SUMMARY_PX - FOOTER_PX;
-const AVAIL_P1_LAST   = A4_HEIGHT_PX - P1_TOP_PX    - TBL_HDR_PX - SUMMARY_PX - FOOTER_PX;
+const AVAIL_P1 = A4_HEIGHT_PX - P1_TOP_PX - TBL_HDR_PX - FOOTER_PX;
+const AVAIL_REST = A4_HEIGHT_PX - REST_TOP_PX - TBL_HDR_PX - FOOTER_PX;
+const AVAIL_LAST_ONLY =
+  A4_HEIGHT_PX - REST_TOP_PX - TBL_HDR_PX - SUMMARY_PX - FOOTER_PX;
+const AVAIL_P1_LAST =
+  A4_HEIGHT_PX - P1_TOP_PX - TBL_HDR_PX - SUMMARY_PX - FOOTER_PX;
 
 // ── Table column header ───────────────────────────────────────────────────────
 const TH = `${FONT} font-size:6.5pt; padding-bottom:6px;
@@ -38,7 +40,7 @@ const generateTableHeader = () => `
 `;
 
 // ── Transaction row ───────────────────────────────────────────────────────────
-const TD     = `${FONT} font-size:6.5pt; vertical-align:top; color:#000; line-height:1.3; border-bottom:1px solid #000;`;
+const TD = `${FONT} font-size:6.5pt; vertical-align:top; color:#000; line-height:1.3; border-bottom:1px solid #000;`;
 const TD_NUM = `${TD} text-align:right;`;
 
 const generateRow = (tx: TransactionRow) => `
@@ -68,7 +70,9 @@ const measureRowHeights = (rows: TransactionRow[]): number[] => {
     </table>`;
   document.body.appendChild(container);
   const trs = container.querySelectorAll("tbody tr");
-  const heights = Array.from(trs).map((tr) => tr.getBoundingClientRect().height);
+  const heights = Array.from(trs).map(
+    (tr) => tr.getBoundingClientRect().height,
+  );
   document.body.removeChild(container);
   return heights;
 };
@@ -79,9 +83,9 @@ const paginateByMeasuredHeight = (
   heights: number[],
 ): TransactionRow[][] => {
   const pages: TransactionRow[][] = [];
-  const remaining  = rows.slice();
+  const remaining = rows.slice();
   const remHeights = heights.slice();
-  let firstPage    = true;
+  let firstPage = true;
 
   const fillPage = (limit: number): TransactionRow[] => {
     const page: TransactionRow[] = [];
@@ -98,9 +102,9 @@ const paginateByMeasuredHeight = (
   };
 
   while (remaining.length > 0) {
-    const remTotal  = remHeights.reduce((s, h) => s + h, 0);
+    const remTotal = remHeights.reduce((s, h) => s + h, 0);
     const lastLimit = firstPage ? AVAIL_P1_LAST : AVAIL_LAST_ONLY;
-    const midLimit  = firstPage ? AVAIL_P1      : AVAIL_REST;
+    const midLimit = firstPage ? AVAIL_P1 : AVAIL_REST;
 
     if (remTotal <= lastLimit) {
       pages.push(remaining.splice(0));
@@ -116,7 +120,7 @@ const paginateByMeasuredHeight = (
 
 // ── Page header (shared; opening balance only shown on first page) ────────────
 const generateHeader = (info: MCBAccountInfo, showOpeningBalance: boolean) => {
-  const KV  = `display:flex; gap:28px; margin-bottom:4px; ${FONT} font-size:7.5pt; color:#000;`;
+  const KV = `display:flex; gap:28px; margin-bottom:4px; ${FONT} font-size:7.5pt; color:#000;`;
   const LBL = `font-weight:bold; min-width:140px; text-align:right;`;
 
   return `
@@ -154,7 +158,9 @@ const generateHeader = (info: MCBAccountInfo, showOpeningBalance: boolean) => {
       ${info.branchInfo}
     </div>
 
-    ${showOpeningBalance ? `
+    ${
+      showOpeningBalance
+        ? `
     <!-- Opening balance (first page only) -->
     <div style="display:flex; justify-content:flex-end; align-items:center; gap:20px;
                 padding:0 0 4px 0; ${FONT} font-weight:bold; font-size:7.5pt; color:#000; margin-bottom:4px;">
@@ -164,7 +170,9 @@ const generateHeader = (info: MCBAccountInfo, showOpeningBalance: boolean) => {
         <div style="display:flex; align-items:center;"><span style="min-width:120px; text-align:left;">Actual:</span> &nbsp;&nbsp;&nbsp;&nbsp; ${info.openingBalance}</div>
       </div>
     </div>
-    ` : ""}
+    `
+        : ""
+    }
 
   </div>
 `;
@@ -231,25 +239,32 @@ export const generateMCBHTML = async (
   info: MCBAccountInfo,
 ): Promise<string> => {
   const measuredHeights = measureRowHeights(transactions);
-  const txPages    = paginateByMeasuredHeight(transactions, measuredHeights);
+  const txPages = paginateByMeasuredHeight(transactions, measuredHeights);
   const totalPages = txPages.length;
 
   // ── Auto-calculated summary values ──────────────────────────────────────────
   const parseAmt = (s: string) => parseFloat(s.replace(/,/g, "")) || 0;
-  const fmtAmt   = (n: number) =>
-    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtAmt = (n: number) =>
+    n.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
-  const debitCount     = transactions.filter((t) => t.debit).length;
-  const creditCount    = transactions.filter((t) => t.credit).length;
-  const totalDebit     = fmtAmt(transactions.reduce((s, t) => s + parseAmt(t.debit),  0));
-  const totalCredit    = fmtAmt(transactions.reduce((s, t) => s + parseAmt(t.credit), 0));
-  const lastTx         = transactions[transactions.length - 1];
+  const debitCount = transactions.filter((t) => t.debit).length;
+  const creditCount = transactions.filter((t) => t.credit).length;
+  const totalDebit = fmtAmt(
+    transactions.reduce((s, t) => s + parseAmt(t.debit), 0),
+  );
+  const totalCredit = fmtAmt(
+    transactions.reduce((s, t) => s + parseAmt(t.credit), 0),
+  );
+  const lastTx = transactions[transactions.length - 1];
   const closingBalance = lastTx?.balance ?? "";
 
   const pagesHtml = txPages.map((rows, idx) => {
     const isFirstPage = idx === 0;
-    const isLastPage  = idx === txPages.length - 1;
-    const pageNum     = idx + 1;
+    const isLastPage = idx === txPages.length - 1;
+    const pageNum = idx + 1;
 
     return `
       <div style="display:flex; flex-direction:column; height:${A4_HEIGHT_PX}px; overflow:hidden;
