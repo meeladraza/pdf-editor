@@ -20,6 +20,7 @@ import { HBLAccountInfoForm } from "./components/HBLAccountInfoForm";
 import { BMLAccountInfoForm } from "./components/BMLAccountInfoForm";
 import { BankIslamiAccountInfoForm } from "./components/BankIslamiAccountInfoForm";
 import { McbAccountInfoForm } from "./components/McbAccountInfoForm";
+import { JsBankAccountInfoForm } from "./components/JsBankAccountInfoForm";
 import { AccountSelectorModal } from "./components/AccountSelectorModal";
 import { PreviewModal } from "./components/PreviewModal";
 import { bankAccountProfiles, PRESERVED_FIELDS, AccountProfile } from "./data/bankAccounts";
@@ -28,7 +29,7 @@ import {
   UBLAccountInfo, FaisalAccountInfo, MeezanAccountInfo,
   MetroAccountInfo, SonehriAccountInfo, DubaiIslamicAccountInfo,
   McbIslamicAccountInfo, BankAlHabibAccountInfo, BankAlFalahAccountInfo,
-  HBLAccountInfo, BMLAccountInfo, BankIslamiAccountInfo, MCBAccountInfo, BankType,
+  HBLAccountInfo, BMLAccountInfo, BankIslamiAccountInfo, MCBAccountInfo, JSBankAccountInfo, BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
 import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
@@ -43,6 +44,7 @@ import { generateHBLHTML } from "./utils/hblHtmlGenerator";
 import { generateBMLHTML } from "./utils/bmlHtmlGenerator";
 import { generateBankIslamiHTML } from "./utils/bankIslamiHtmlGenerator";
 import { generateMCBHTML } from "./utils/mcbHtmlGenerator";
+import { generateJsBankHTML } from "./utils/jsBankHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -68,6 +70,7 @@ function App() {
   const [bmlTransactions, setBmlTransactions] = useState<TransactionRow[]>([]);
   const [bankIslamiTransactions, setBankIslamiTransactions] = useState<TransactionRow[]>([]);
   const [mcbBankTransactions, setMcbBankTransactions] = useState<TransactionRow[]>([]);
+  const [jsBankTransactions, setJsBankTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountSelectorOpen, setIsAccountSelectorOpen] = useState(false);
   const [activeProfileIds, setActiveProfileIds] = useState<Record<string, string>>(
@@ -268,6 +271,27 @@ function App() {
     openingBalance:    "1,717,177.70",
   });
 
+  const [jsBankAccountInfo, setJsBankAccountInfo] = useState<JSBankAccountInfo>({
+    statementDate:      "22 October 2025",
+    statementTime:      "15:10:14",
+    accountName:        "A R INDUSTRIES",
+    attnName:           "MUHAMMAD AQEEL PINGER",
+    address1:           "PLOT NO F 73 SITE SUPER HIGWAY",
+    address2:           "PHASE 2 MALIR GADAP TOWN KARACHI",
+    accountNo:          "0001477430",
+    oldAccountNo:       "PK64JSBL9519000001477430",
+    ibanNo:             "PK64JSBL9519000001477430",
+    accountType:        "1001-Current Accounts",
+    currency:           "PKR",
+    startDate:          "20 OCT 2025",
+    endDate:            "20 OCT 2025",
+    jointHolders:       "NONE",
+    statementDateLabel: "22 OCT 2025",
+    openingBalance:     "443,796.68",
+    user:               "HIBAH.12494",
+    timeDate:           "15:10:14 22 OCT 2025",
+  });
+
   const [bankIslamiAccountInfo, setBankIslamiAccountInfo] = useState<BankIslamiAccountInfo>({
     issuingBranch:    "COCHINWALA MARKET",
     accountName:      "SKF COLLECTION",
@@ -313,6 +337,7 @@ function App() {
     else if (selectedBank === "bml")        apply(setBmlAccountInfo);
     else if (selectedBank === "bankislami") apply(setBankIslamiAccountInfo);
     else if (selectedBank === "mcbbank")    apply(setMcbBankAccountInfo);
+    else if (selectedBank === "jsbank")     apply(setJsBankAccountInfo);
     setActiveProfileIds(prev => ({ ...prev, [selectedBank]: profile.id }));
     setIsAccountSelectorOpen(false);
   };
@@ -333,6 +358,7 @@ function App() {
     setBmlTransactions([]);
     setBankIslamiTransactions([]);
     setMcbBankTransactions([]);
+    setJsBankTransactions([]);
     setHtmlContent("");
   };
 
@@ -350,6 +376,7 @@ function App() {
     else if (selectedBank === "bml")        setBmlTransactions(data as TransactionRow[]);
     else if (selectedBank === "bankislami") setBankIslamiTransactions(data as TransactionRow[]);
     else if (selectedBank === "mcbbank")    setMcbBankTransactions(data as TransactionRow[]);
+    else if (selectedBank === "jsbank")     setJsBankTransactions(data as TransactionRow[]);
   };
 
   const handleGeneratePreview = async () => {
@@ -380,6 +407,8 @@ function App() {
       html = await generateBankIslamiHTML(bankIslamiTransactions, bankIslamiAccountInfo);
     else if (selectedBank === "mcbbank" && mcbBankTransactions.length > 0)
       html = await generateMCBHTML(mcbBankTransactions, mcbBankAccountInfo);
+    else if (selectedBank === "jsbank" && jsBankTransactions.length > 0)
+      html = await generateJsBankHTML(jsBankTransactions, jsBankAccountInfo);
 
     if (html) { setHtmlContent(html); setIsModalOpen(true); }
     else alert("Please upload an Excel file first");
@@ -403,7 +432,8 @@ function App() {
                       selectedBank === "hbl" ? hblTransactions.length > 0 :
                         selectedBank === "bml" ? bmlTransactions.length > 0 :
                           selectedBank === "bankislami" ? bankIslamiTransactions.length > 0 :
-                            mcbBankTransactions.length > 0;
+                            selectedBank === "mcbbank" ? mcbBankTransactions.length > 0 :
+                              jsBankTransactions.length > 0;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -490,7 +520,7 @@ function App() {
 
         {/* Sidebar footer */}
         <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-          <p className="text-[10px] text-slate-400 text-center">13 bank templates · A4 PDF export</p>
+          <p className="text-[10px] text-slate-400 text-center">14 bank templates · A4 PDF export</p>
         </div>
       </aside>
 
@@ -544,8 +574,10 @@ function App() {
               <BMLAccountInfoForm accountInfo={bmlAccountInfo} onChange={setBmlAccountInfo} />
             ) : selectedBank === "bankislami" ? (
               <BankIslamiAccountInfoForm accountInfo={bankIslamiAccountInfo} onChange={setBankIslamiAccountInfo} />
-            ) : (
+            ) : selectedBank === "mcbbank" ? (
               <McbAccountInfoForm accountInfo={mcbBankAccountInfo} onChange={setMcbBankAccountInfo} />
+            ) : (
+              <JsBankAccountInfoForm accountInfo={jsBankAccountInfo} onChange={setJsBankAccountInfo} />
             )}
           </div>
 

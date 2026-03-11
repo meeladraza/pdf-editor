@@ -1,4 +1,4 @@
-export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl" | "bml" | "bankislami" | "mcbbank";
+export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl" | "bml" | "bankislami" | "mcbbank" | "jsbank";
 
 export interface TransactionRow {
   date: string;
@@ -222,6 +222,27 @@ export interface BMLAccountInfo {
   toDate: string;
   openingBalance: string;
   runBy: string;
+}
+
+export interface JSBankAccountInfo {
+  statementDate: string;      // "22 October 2025" (top-right header)
+  statementTime: string;      // "15:10:14"
+  accountName: string;        // "A R INDUSTRIES"
+  attnName: string;           // "MUHAMMAD AQEEL PINGER"
+  address1: string;
+  address2: string;
+  accountNo: string;
+  oldAccountNo: string;
+  ibanNo: string;
+  accountType: string;
+  currency: string;
+  startDate: string;          // "20 OCT 2025"
+  endDate: string;            // "20 OCT 2025"
+  jointHolders: string;
+  statementDateLabel: string; // "22 OCT 2025" (Statement Date field)
+  openingBalance: string;
+  user: string;               // "HIBAH.12494"
+  timeDate: string;           // "15:10:14 22 OCT 2025"
 }
 
 export interface MCBAccountInfo {

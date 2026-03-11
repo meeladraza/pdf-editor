@@ -354,6 +354,28 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
     },
   ],
 
+  jsbank: [
+    {
+      id: "jsbank-1",
+      label: "A R INDUSTRIES",
+      subtitle: "JS Bank",
+      data: {
+        accountName: "A R INDUSTRIES",
+        attnName: "MUHAMMAD AQEEL PINGER",
+        address1: "PLOT NO F 73 SITE SUPER HIGWAY",
+        address2: "PHASE 2 MALIR GADAP TOWN KARACHI",
+        accountNo: "0001477430",
+        oldAccountNo: "PK64JSBL9519000001477430",
+        ibanNo: "PK64JSBL9519000001477430",
+        accountType: "1001-Current Accounts",
+        currency: "PKR",
+        jointHolders: "NONE",
+        statementTime: "15:10:14",
+        user: "HIBAH.12494",
+      },
+    },
+  ],
+
   mcbbank: [
     {
       id: "mcbbank-1",
