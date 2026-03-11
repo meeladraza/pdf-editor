@@ -4,8 +4,8 @@ const FONT = "font-family: Arial, sans-serif;";
 
 // ── Pagination constants ──────────────────────────────────────────────────────
 const A4_HEIGHT_PX  = 1123;
-const P1_TOP_PX     = 258;  // logo+info+branch+opening balance+NOTE on p1
-const REST_TOP_PX   = 52;   // minimal header on non-first pages
+const P1_TOP_PX     = 258;  // full header with opening balance
+const REST_TOP_PX   = 216;  // full header WITHOUT opening balance (~42px less)
 const TBL_HDR_PX    = 36;   // 11-column header row
 const SUMMARY_PX    = 88;   // summary section (4 left rows + 2 right rows)
 const FOOTER_PX     = 22;   // NOTE + page number
@@ -16,29 +16,29 @@ const AVAIL_LAST_ONLY = A4_HEIGHT_PX - REST_TOP_PX  - TBL_HDR_PX - SUMMARY_PX - 
 const AVAIL_P1_LAST   = A4_HEIGHT_PX - P1_TOP_PX    - TBL_HDR_PX - SUMMARY_PX - FOOTER_PX;
 
 // ── Table column header ───────────────────────────────────────────────────────
-const TH = `${FONT} font-size:7pt; padding-bottom:4px;
+const TH = `${FONT} font-size:6.5pt; padding-bottom:6px;
             border-top:1px solid #000; border-bottom: 1px solid #000; font-weight: normal; background:#f2f2f2; color:#000;`;
 
 const generateTableHeader = () => `
   <thead>
     <tr>
-      <th style="${TH} width:7%; text-align:right; border-left: 1px solid #000;">Tran. Date</th>
-      <th style="${TH} width:7%; text-align:center;">Effect Date</th>
-      <th style="${TH} width:4%; text-align: center;">Tran. Br.</th>
-      <th style="${TH} width:20%; text-align:center">Transaction Details</th>
-      <th style="${TH} width:9%;">Remitter Name</th>
-      <th style="${TH} width:12%;">Remitter IBAN</th>
-      <th style="${TH} width:8%;">Remitter Bank</th>
-      <th style="${TH} width:8%;">Chq / Ref No</th>
-      <th style="${TH} width:8%; text-align: right;">Debit</th>
-      <th style="${TH} width:8%; text-align:right;">Credit</th>
-      <th style="${TH} width:9%; text-align:right; padding-right: 2px; border-right: 1px solid #000;">Balance</th>
+      <th style="${TH} width:6.5%; text-align:right; border-left: 1px solid #000;">Tran. Date</th>
+      <th style="${TH} width:6.5%; text-align:center;">Effect Date</th>
+      <th style="${TH} width:5%; text-align: center;">Tran. Br.</th>
+      <th style="${TH} width:13%; text-align:left">Transaction Details</th>
+      <th style="${TH} width:8.2%; text-align: left;">Remitter Name</th>
+      <th style="${TH} width:8.2%; text-align: left;">Remitter IBAN</th>
+      <th style="${TH} width:8.2%; text-align: left;">Remitter Bank</th>
+      <th style="${TH} width:11.4%; text-align: left;">Chq / Ref No</th>
+      <th style="${TH} width:12%; text-align: right;">Debit</th>
+      <th style="${TH} width:10%; text-align:right;">Credit</th>
+      <th style="${TH} width:11%; text-align:right; padding-right: 2px; border-right: 1px solid #000;">Balance</th>
     </tr>
   </thead>
 `;
 
 // ── Transaction row ───────────────────────────────────────────────────────────
-const TD     = `${FONT} font-size:7pt; vertical-align:top; color:#000; line-height:1.3; border-bottom:1px solid #000;`;
+const TD     = `${FONT} font-size:6.5pt; vertical-align:top; color:#000; line-height:1.3; border-bottom:1px solid #000;`;
 const TD_NUM = `${TD} text-align:right;`;
 
 const generateRow = (tx: TransactionRow) => `
@@ -114,9 +114,9 @@ const paginateByMeasuredHeight = (
   return pages;
 };
 
-// ── Full header (first page) ──────────────────────────────────────────────────
-const generateFirstPageHeader = (info: MCBAccountInfo) => {
-  const KV = `display:flex; gap:28px; margin-bottom:4px; ${FONT} font-size:7.5pt; color:#000;`;
+// ── Page header (shared; opening balance only shown on first page) ────────────
+const generateHeader = (info: MCBAccountInfo, showOpeningBalance: boolean) => {
+  const KV  = `display:flex; gap:28px; margin-bottom:4px; ${FONT} font-size:7.5pt; color:#000;`;
   const LBL = `font-weight:bold; min-width:140px; text-align:right;`;
 
   return `
@@ -126,64 +126,49 @@ const generateFirstPageHeader = (info: MCBAccountInfo) => {
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2px;">
       <div style="display:flex; align-items:flex-end; gap:4px;">
         <img src="/mcb-logo.png" alt="MCB" style="height:55px;" />
-        <span style="${FONT} font-size:9pt; font-weight:bold; color:#000; padding-bottom: 4px;">MCB Bank Limited</span>
+        <span style="${FONT} font-size:9pt; font-weight:bold; color:#000; padding-bottom:4px;">MCB Bank Limited</span>
       </div>
-      <div style="${FONT} font-size:9pt; font-weight:bold; color:#000; padding-top: 6px">Account Statement</div>
+      <div style="${FONT} font-size:9pt; font-weight:bold; color:#000; padding-top:6px;">Account Statement</div>
     </div>
 
-    <div style="font-size: 6pt; font-weight: bold; line-height: 1.4;">${info.accountTitle}</div>
+    <div style="font-size:6pt; font-weight:bold; line-height:1.4;">${info.accountTitle}</div>
 
     <!-- Two-column: address (left) | account details (right) -->
-    <div style="display:flex; align-items: flex-start; justify-content: space-between; margin-bottom:8px;">
-
-      <!-- Left: account title + address -->
-      <div style=" ${FONT} font-size:7.5pt; color:#000; line-height:1.4; font-weight: bold; padding-top: 20px;">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px;">
+      <div style="${FONT} font-size:7.5pt; color:#000; line-height:1.4; font-weight:bold; padding-top:20px;">
         <div>${info.address} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NORTH KARACHI</div>
         <div>INDUSTRIAL AREA &nbsp;&nbsp;&nbsp; \KARACHI 0311-8266060</div>
       </div>
-
-      <!-- Right: key-value pairs -->
       <div style="${FONT} font-size:7.5pt; color:#000;">
-        <div style="${KV}"><span style="${LBL}">Account No:</span><span style="font-weight: bold;">${info.accountNo}</span></div>
-        <div style="${KV}"><span style="${LBL}">IBAN:</span><span style="font-weight: bold;">${info.iban}</span></div>
-        <div style="${KV}"><span style="${LBL}">Account Type / CCY:&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight: bold;">${info.accountType} &nbsp;/&nbsp; ${info.currency}</span></div>
-        <div style="${KV}"><span style="${LBL}">Date of Account Open:</span><span style="font-weight: bold;">${info.accountOpenDate}</span></div>
+        <div style="${KV}"><span style="${LBL}">Account No:</span><span style="font-weight:bold;">${info.accountNo}</span></div>
+        <div style="${KV}"><span style="${LBL}">IBAN:</span><span style="font-weight:bold;">${info.iban}</span></div>
+        <div style="${KV}"><span style="${LBL}">Account Type / CCY:&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="font-weight:bold;">${info.accountType} &nbsp;/&nbsp; ${info.currency}</span></div>
+        <div style="${KV}"><span style="${LBL}">Date of Account Open:</span><span style="font-weight:bold;">${info.accountOpenDate}</span></div>
         <div style="${KV}"><span style="${LBL}">Statement Period: &nbsp;From Date:</span><span>${info.fromDate} &nbsp;<strong>To Date</strong> ${info.toDate}</span></div>
         <div style="${KV}"><span style="${LBL}">Statement Date &amp; Time:</span><span>${info.statementDateTime}</span></div>
       </div>
     </div>
 
     <!-- Branch info (full width) -->
-    <div style="${FONT} font-size:8pt; font-weight:bold; color:#000; margin-bottom:4px; padding-bottom:12px; border-bottom:1px solid #000;">
+    <div style="${FONT} font-size:8pt; font-weight:bold; color:#000; margin-bottom:4px; padding-bottom:12px; ${showOpeningBalance ? "border-bottom: 0;" : "border-bottom:1px solid #000;"}">
       ${info.branchInfo}
     </div>
 
-    <!-- Opening balance -->
+    ${showOpeningBalance ? `
+    <!-- Opening balance (first page only) -->
     <div style="display:flex; justify-content:flex-end; align-items:center; gap:20px;
                 padding:0 0 4px 0; ${FONT} font-weight:bold; font-size:7.5pt; color:#000; margin-bottom:4px;">
       <span>Opening Balance</span>
       <div style="text-align:right; line-height:1.7;">
-        <div style="display: flex; align-items: center;"><span style="min-width: 120px; text-align:left;">Ledger:</span> &nbsp;&nbsp;&nbsp; ${info.openingBalance}</div>
-        <div style="display: flex; align-items: center;"><span style="min-width: 120px; text-align:left;">Actual:</span> &nbsp;&nbsp;&nbsp;&nbsp; ${info.openingBalance}</div>
+        <div style="display:flex; align-items:center;"><span style="min-width:120px; text-align:left;">Ledger:</span> &nbsp;&nbsp;&nbsp; ${info.openingBalance}</div>
+        <div style="display:flex; align-items:center;"><span style="min-width:120px; text-align:left;">Actual:</span> &nbsp;&nbsp;&nbsp;&nbsp; ${info.openingBalance}</div>
       </div>
     </div>
-   
+    ` : ""}
+
   </div>
 `;
 };
-
-// ── Minimal header (non-first pages) ─────────────────────────────────────────
-const generateRestHeader = (info: MCBAccountInfo) => `
-  <div style="display:flex; justify-content:space-between; align-items:center;
-              padding:14px 16px 8px 16px; border-bottom:1px solid #ccc;">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <img src="/mcb-logo.png" alt="MCB" style="height:28px;" />
-      <span style="${FONT} font-size:9pt; font-weight:bold;">MCB Bank Limited</span>
-    </div>
-    <div style="${FONT} font-size:10pt; font-weight:bold;">Account Statement</div>
-    <div style="${FONT} font-size:7.5pt; color:#444;">${info.accountTitle} &nbsp;|&nbsp; ${info.accountNo}</div>
-  </div>
-`;
 
 // ── Summary section (last page) ───────────────────────────────────────────────
 const generateSummary = (
@@ -234,10 +219,9 @@ const generateSummary = (
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 const generateFooter = (pageNum: number, totalPages: number) => `
-  <div style="display:flex; justify-content:space-between; align-items:center;
-              padding:4px 16px 6px 16px; ${FONT} font-size:6pt; color:#000; flex-shrink:0;">
-    <span>NOTE: Impact of Outward Clearing Transactions (CHEQUE CLEARING CREDIT) will be reflected in the account balance once the instrument has been realized</span>
-    <span style="font-weight:bold; white-space:nowrap; margin-left:8px;">Page: ${pageNum} of ${totalPages}</span>
+  <div style="padding:4px 32px 20px 32px; ${FONT} color:#000; flex-shrink:0; font-weight:bold">
+    <span style="font-size:6pt;">NOTE: Impact of Outward Clearing Transactions (CHEQUE CLEARING CREDIT) will be reflected in the account balance once the instrument has been realized</span>
+    <span style="margin-top: 1px; font-size:7pt; font-weight:bold; white-space:nowrap; margin-left: 6px">Page: ${pageNum} of ${totalPages}</span>
   </div>
 `;
 
@@ -270,7 +254,7 @@ export const generateMCBHTML = async (
     return `
       <div style="display:flex; flex-direction:column; height:${A4_HEIGHT_PX}px; overflow:hidden;
                   page-break-before:${isFirstPage ? "auto" : "always"};">
-        ${isFirstPage ? generateFirstPageHeader(info) : generateRestHeader(info)}
+        ${generateHeader(info, isFirstPage)}
         <div style="padding:0 16px 2px 16px;">
           <table style="width:100%; border-collapse:collapse;">
             ${generateTableHeader()}
