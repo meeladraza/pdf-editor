@@ -1,4 +1,4 @@
-export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl" | "bml" | "bankislami" | "mcbbank" | "jsbank";
+export type BankType = "ubl" | "faisal" | "meezan" | "metro" | "sonehri" | "dubai" | "mcb" | "alhabib" | "alfalah" | "hbl" | "bml" | "bankislami" | "mcbbank" | "jsbank" | "askari";
 
 export interface TransactionRow {
   date: string;
@@ -243,6 +243,21 @@ export interface JSBankAccountInfo {
   openingBalance: string;
   user: string;               // "HIBAH.12494"
   timeDate: string;           // "15:10:14 22 OCT 2025"
+}
+
+export interface AskariAccountInfo {
+  name: string;          // "RAZ TEXTILES"
+  address1: string;
+  address2: string;
+  address3: string;
+  phone: string;
+  branchName: string;    // "IBB M.A Jinnah Road (Bolton Market)"
+  fromDate: string;      // "01-SEP-25"
+  toDate: string;        // "25-FEB-26"
+  accountNumber: string; // "7620200000395"
+  currency: string;      // "Pak Rupees"
+  accountType: string;   // "Current A/C (AICA)"
+  issuedOn: string;      // "25-Feb-2026"
 }
 
 export interface MCBAccountInfo {

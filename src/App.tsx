@@ -21,6 +21,7 @@ import { BMLAccountInfoForm } from "./components/BMLAccountInfoForm";
 import { BankIslamiAccountInfoForm } from "./components/BankIslamiAccountInfoForm";
 import { McbAccountInfoForm } from "./components/McbAccountInfoForm";
 import { JsBankAccountInfoForm } from "./components/JsBankAccountInfoForm";
+import { AskariAccountInfoForm } from "./components/AskariAccountInfoForm";
 import { AccountSelectorModal } from "./components/AccountSelectorModal";
 import { PreviewModal } from "./components/PreviewModal";
 import { bankAccountProfiles, PRESERVED_FIELDS, AccountProfile } from "./data/bankAccounts";
@@ -29,7 +30,7 @@ import {
   UBLAccountInfo, FaisalAccountInfo, MeezanAccountInfo,
   MetroAccountInfo, SonehriAccountInfo, DubaiIslamicAccountInfo,
   McbIslamicAccountInfo, BankAlHabibAccountInfo, BankAlFalahAccountInfo,
-  HBLAccountInfo, BMLAccountInfo, BankIslamiAccountInfo, MCBAccountInfo, JSBankAccountInfo, BankType,
+  HBLAccountInfo, BMLAccountInfo, BankIslamiAccountInfo, MCBAccountInfo, JSBankAccountInfo, AskariAccountInfo, BankType,
 } from "./types";
 import { generateUBLHTML } from "./utils/UblHtmlGenerator";
 import { generateFaisalHTML } from "./utils/faisalHtmlGenerator";
@@ -45,6 +46,7 @@ import { generateBMLHTML } from "./utils/bmlHtmlGenerator";
 import { generateBankIslamiHTML } from "./utils/bankIslamiHtmlGenerator";
 import { generateMCBHTML } from "./utils/mcbHtmlGenerator";
 import { generateJsBankHTML } from "./utils/jsBankHtmlGenerator";
+import { generateAskariHTML } from "./utils/askariHtmlGenerator";
 import { generatePDF, downloadPDF } from "./utils/pdfGenerator";
 
 function App() {
@@ -71,6 +73,7 @@ function App() {
   const [bankIslamiTransactions, setBankIslamiTransactions] = useState<TransactionRow[]>([]);
   const [mcbBankTransactions, setMcbBankTransactions] = useState<TransactionRow[]>([]);
   const [jsBankTransactions, setJsBankTransactions] = useState<TransactionRow[]>([]);
+  const [askariTransactions, setAskariTransactions] = useState<TransactionRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountSelectorOpen, setIsAccountSelectorOpen] = useState(false);
   const [activeProfileIds, setActiveProfileIds] = useState<Record<string, string>>(
@@ -292,6 +295,21 @@ function App() {
     timeDate:           "15:10:14 22 OCT 2025",
   });
 
+  const [askariAccountInfo, setAskariAccountInfo] = useState<AskariAccountInfo>({
+    name:          "RAZ TEXTILES",
+    address1:      "PLOT NO L-33/C,",
+    address2:      "BLOCK 22,",
+    address3:      "FEDERAL B AREA KARACHI",
+    phone:         "03209251495",
+    branchName:    "IBB M.A Jinnah Road (Bolton Market)",
+    fromDate:      "01-SEP-25",
+    toDate:        "25-FEB-26",
+    accountNumber: "7620200000395",
+    currency:      "Pak Rupees",
+    accountType:   "Current A/C (AICA)",
+    issuedOn:      "25-Feb-2026",
+  });
+
   const [bankIslamiAccountInfo, setBankIslamiAccountInfo] = useState<BankIslamiAccountInfo>({
     issuingBranch:    "COCHINWALA MARKET",
     accountName:      "SKF COLLECTION",
@@ -338,6 +356,7 @@ function App() {
     else if (selectedBank === "bankislami") apply(setBankIslamiAccountInfo);
     else if (selectedBank === "mcbbank")    apply(setMcbBankAccountInfo);
     else if (selectedBank === "jsbank")     apply(setJsBankAccountInfo);
+    else if (selectedBank === "askari")     apply(setAskariAccountInfo);
     setActiveProfileIds(prev => ({ ...prev, [selectedBank]: profile.id }));
     setIsAccountSelectorOpen(false);
   };
@@ -359,6 +378,7 @@ function App() {
     setBankIslamiTransactions([]);
     setMcbBankTransactions([]);
     setJsBankTransactions([]);
+    setAskariTransactions([]);
     setHtmlContent("");
   };
 
@@ -377,6 +397,7 @@ function App() {
     else if (selectedBank === "bankislami") setBankIslamiTransactions(data as TransactionRow[]);
     else if (selectedBank === "mcbbank")    setMcbBankTransactions(data as TransactionRow[]);
     else if (selectedBank === "jsbank")     setJsBankTransactions(data as TransactionRow[]);
+    else if (selectedBank === "askari")     setAskariTransactions(data as TransactionRow[]);
   };
 
   const handleGeneratePreview = async () => {
@@ -409,6 +430,8 @@ function App() {
       html = await generateMCBHTML(mcbBankTransactions, mcbBankAccountInfo);
     else if (selectedBank === "jsbank" && jsBankTransactions.length > 0)
       html = await generateJsBankHTML(jsBankTransactions, jsBankAccountInfo);
+    else if (selectedBank === "askari" && askariTransactions.length > 0)
+      html = await generateAskariHTML(askariTransactions, askariAccountInfo);
 
     if (html) { setHtmlContent(html); setIsModalOpen(true); }
     else alert("Please upload an Excel file first");
@@ -433,7 +456,8 @@ function App() {
                         selectedBank === "bml" ? bmlTransactions.length > 0 :
                           selectedBank === "bankislami" ? bankIslamiTransactions.length > 0 :
                             selectedBank === "mcbbank" ? mcbBankTransactions.length > 0 :
-                              jsBankTransactions.length > 0;
+                              selectedBank === "jsbank" ? jsBankTransactions.length > 0 :
+                                askariTransactions.length > 0;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -520,7 +544,7 @@ function App() {
 
         {/* Sidebar footer */}
         <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-          <p className="text-[10px] text-slate-400 text-center">14 bank templates · A4 PDF export</p>
+          <p className="text-[10px] text-slate-400 text-center">15 bank templates · A4 PDF export</p>
         </div>
       </aside>
 
@@ -576,8 +600,10 @@ function App() {
               <BankIslamiAccountInfoForm accountInfo={bankIslamiAccountInfo} onChange={setBankIslamiAccountInfo} />
             ) : selectedBank === "mcbbank" ? (
               <McbAccountInfoForm accountInfo={mcbBankAccountInfo} onChange={setMcbBankAccountInfo} />
-            ) : (
+            ) : selectedBank === "jsbank" ? (
               <JsBankAccountInfoForm accountInfo={jsBankAccountInfo} onChange={setJsBankAccountInfo} />
+            ) : (
+              <AskariAccountInfoForm accountInfo={askariAccountInfo} onChange={setAskariAccountInfo} />
             )}
           </div>
 
@@ -595,7 +621,7 @@ function App() {
               </p>
               <div className="space-y-2.5 text-left">
                 {([
-                  { Icon: Building2, color: "blue", title: "9 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
+                  { Icon: Building2, color: "blue", title: "15 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
                   { Icon: FileSpreadsheet, color: "green", title: "Excel Import", sub: "Upload .xlsx or .xls files" },
                   { Icon: Download, color: "purple", title: "PDF Export", sub: "Professional A4 bank statements" },
                 ] as const).map(({ Icon, color, title, sub }) => (

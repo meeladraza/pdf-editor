@@ -394,4 +394,23 @@ export const bankAccountProfiles: Record<string, AccountProfile[]> = {
       },
     },
   ],
+
+  askari: [
+    {
+      id: "askari-1",
+      label: "RAZ TEXTILES",
+      subtitle: "IBB M.A Jinnah Road (Bolton Market)",
+      data: {
+        name:          "RAZ TEXTILES",
+        address1:      "PLOT NO L-33/C,",
+        address2:      "BLOCK 22,",
+        address3:      "FEDERAL B AREA KARACHI",
+        phone:         "03209251495",
+        branchName:    "IBB M.A Jinnah Road (Bolton Market)",
+        accountNumber: "7620200000395",
+        currency:      "Pak Rupees",
+        accountType:   "Current A/C (AICA)",
+      },
+    },
+  ],
 };
