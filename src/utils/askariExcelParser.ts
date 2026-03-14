@@ -1,7 +1,9 @@
 import * as XLSX from "xlsx";
 import { TransactionRow } from "../types";
 
-// Askari Bank columns: DATE | PARTICULARS | INS #/Time | VAL DATE | AMOUNT | BALANCE
+// Excel columns: DATE(0) | INS#(1) | DESCRIPTION(2) | DEBIT(3) | CREDIT(4) | BALANCE(5)
+// PDF columns:  DATE     | PARTICULARS               | INS #/Time  | VAL DATE  | AMOUNT   | BALANCE
+// VAL DATE = same as DATE (no separate val date column in Excel)
 
 const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -20,7 +22,7 @@ const formatDate = (val: any): string => {
       return toDisplayDate(date.getDate(), date.getMonth(), date.getFullYear());
   }
 
-  // Already formatted (e.g. "01-SEP-25", "01-Sep-2025")
+  // Already formatted (e.g. "01-SEP-25")
   if (/^\d{1,2}-[A-Za-z]{3}-\d{2,4}$/.test(s)) return s;
 
   // DD/MM/YYYY
@@ -43,27 +45,12 @@ const formatDate = (val: any): string => {
 const fmt2dec = (n: number): string =>
   n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// Parse AMOUNT column: positive number or string = credit; negative number or "X DB" = debit
-const parseAmount = (val: any): { debit: string; credit: string } => {
-  if (!val && val !== 0) return { debit: "", credit: "" };
-  const s = String(val).trim();
-  if (!s) return { debit: "", credit: "" };
-
-  // String ending with "DB" or "db"
-  if (/DB$/i.test(s)) {
-    const numStr = s.replace(/DB$/i, "").trim().replace(/,/g, "");
-    const n = Math.abs(parseFloat(numStr));
-    if (isNaN(n) || n === 0) return { debit: "", credit: "" };
-    return { debit: fmt2dec(n), credit: "" };
-  }
-
-  // Numeric value
-  const numStr = s.replace(/,/g, "");
-  const n = parseFloat(numStr);
-  if (isNaN(n)) return { debit: "", credit: "" };
-  if (n < 0)  return { debit: fmt2dec(Math.abs(n)), credit: "" };
-  if (n === 0) return { debit: "", credit: "" };
-  return { debit: "", credit: fmt2dec(n) };
+// Parse a positive amount column (separate credit or debit column)
+const parsePositive = (val: any): string => {
+  if (!val && val !== 0) return "";
+  const n = parseFloat(String(val).replace(/,/g, ""));
+  if (isNaN(n) || n <= 0) return "";
+  return fmt2dec(n);
 };
 
 const cleanBalance = (val: any): string => {
@@ -90,30 +77,32 @@ export const parseAskariExcelFile = (file: File): Promise<TransactionRow[]> => {
 
         for (let i = 0; i < jsonData.length; i++) {
           const row  = jsonData[i];
-          const desc = row[1] ? String(row[1]).trim() : "";
+          const desc = row[2] ? String(row[2]).trim() : "";
 
           // Skip fully empty rows
-          if (!row[0] && !desc && !row[4] && !row[5]) continue;
+          if (!row[0] && !desc && !row[3] && !row[4] && !row[5]) continue;
 
           // Skip column header rows
           const descLower = desc.toLowerCase();
           if (descLower === "particulars" || descLower === "description") continue;
 
-          // Skip TOTAL / CLOSING rows (we generate them programmatically)
-          if (descLower.includes("total") && !desc.includes(" ")) continue;
+          // Skip pure TOTAL rows
+          if (descLower === "total") continue;
 
-          const { debit, credit } = parseAmount(row[4]);
+          const debit  = parsePositive(row[3]);
+          const credit = parsePositive(row[4]);
+          const txDate = formatDate(row[0]);
 
           const isOpening = descLower.includes("opening balance");
           const isClosing = descLower.includes("closing balance");
 
           transactions.push({
-            date:             formatDate(row[0]),
+            date:             txDate,
             particulars:      desc,
-            instNo:           row[2] ? String(row[2]).trim() : "",
-            valueDate:        formatDate(row[3]),
-            debit,
+            instNo:           row[1] ? String(row[1]).trim() : "",
+            valueDate:        txDate,   // same as date — no separate val date column
             credit,
+            debit,
             balance:          cleanBalance(row[5]),
             isOpeningBalance: isOpening,
             isClosingBalance: isClosing,
