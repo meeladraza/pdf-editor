@@ -1,64 +1,8 @@
 // ============================================================
-// Module-level cache — persists for the lifetime of the page session.
-// Each unique image URL is fetched only once, no matter how many
-// <img> tags reference it across all generated pages.
-// ============================================================
-const imageCache = new Map<string, string>();
-
-// ============================================================
-// Embed images as base64
-// ============================================================
-const embedImages = async (html: string): Promise<string> => {
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    const imgs = Array.from(doc.getElementsByTagName("img"));
-
-    await Promise.all(
-      imgs.map(async (img) => {
-        const src = img.getAttribute("src");
-        if (!src || src.startsWith("data:")) return;
-
-        let imageUrl = src;
-        if (src.startsWith("/")) {
-          imageUrl = window.location.origin + src;
-        } else if (!/^https?:\/\//i.test(src)) {
-          imageUrl = new URL(src, window.location.href).toString();
-        }
-
-        // Return cached base64 if already fetched
-        if (imageCache.has(imageUrl)) {
-          img.setAttribute("src", imageCache.get(imageUrl)!);
-          return;
-        }
-
-        try {
-          const resp = await fetch(imageUrl);
-          if (!resp.ok) return;
-          const blob = await resp.blob();
-          const dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result));
-            reader.onerror = (e) => reject(e);
-            reader.readAsDataURL(blob);
-          });
-          imageCache.set(imageUrl, dataUrl); // Store in cache for reuse
-          img.setAttribute("src", dataUrl);
-        } catch (e) {
-          console.warn("Failed to inline image", src, e);
-        }
-      }),
-    );
-
-    return doc.documentElement.outerHTML;
-  } catch (e) {
-    console.warn("embedImages error", e);
-    return html;
-  }
-};
-
-// ============================================================
 // MAIN: Generate PDF using Gotenberg
+// Images are embedded server-side by the proxy — do NOT inline
+// them here. Sending base64 images from the browser bloats the
+// payload to 50MB+ for large statements and triggers 413 errors.
 // ============================================================
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -66,14 +10,12 @@ export const generatePDF = async (
   htmlContent: string,
 ): Promise<ArrayBuffer> => {
   try {
-    const htmlWithImages = await embedImages(htmlContent);
-
     const response = await fetch(`${API_BASE}/api/generate-pdf`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ html: htmlWithImages }),
+      body: JSON.stringify({ html: htmlContent }),
     });
 
     if (!response.ok) {
