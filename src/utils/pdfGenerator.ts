@@ -1,5 +1,12 @@
 // ============================================================
-// Embed images as base64 (keep your existing function as-is)
+// Module-level cache — persists for the lifetime of the page session.
+// Each unique image URL is fetched only once, no matter how many
+// <img> tags reference it across all generated pages.
+// ============================================================
+const imageCache = new Map<string, string>();
+
+// ============================================================
+// Embed images as base64
 // ============================================================
 const embedImages = async (html: string): Promise<string> => {
   try {
@@ -19,6 +26,12 @@ const embedImages = async (html: string): Promise<string> => {
           imageUrl = new URL(src, window.location.href).toString();
         }
 
+        // Return cached base64 if already fetched
+        if (imageCache.has(imageUrl)) {
+          img.setAttribute("src", imageCache.get(imageUrl)!);
+          return;
+        }
+
         try {
           const resp = await fetch(imageUrl);
           if (!resp.ok) return;
@@ -29,6 +42,7 @@ const embedImages = async (html: string): Promise<string> => {
             reader.onerror = (e) => reject(e);
             reader.readAsDataURL(blob);
           });
+          imageCache.set(imageUrl, dataUrl); // Store in cache for reuse
           img.setAttribute("src", dataUrl);
         } catch (e) {
           console.warn("Failed to inline image", src, e);
@@ -75,7 +89,7 @@ export const generatePDF = async (
 };
 
 // ============================================================
-// Download helper (unchanged from your original)
+// Download helper
 // ============================================================
 export const downloadPDF = (
   pdfData: ArrayBuffer,
