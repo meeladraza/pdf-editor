@@ -622,7 +622,7 @@ function App() {
               <div className="space-y-2.5 text-left">
                 {([
                   { Icon: Building2, color: "blue", title: "15 Bank Templates", sub: "UBL, Meezan, MCB, AlFalah & more" },
-                  { Icon: FileSpreadsheet, color: "green", title: "Excel Import", sub: "Upload .xlsx or .xls files" },
+                  { Icon: FileSpreadsheet, color: "green", title: "Excel / CSV Import", sub: "Upload .xlsx, .xls or .csv files" },
                   { Icon: Download, color: "purple", title: "PDF Export", sub: "Professional A4 bank statements" },
                 ] as const).map(({ Icon, color, title, sub }) => (
                   <div key={title} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-100 shadow-sm">

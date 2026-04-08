@@ -28,8 +28,8 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const processFile = async (file: File) => {
-    if (!file.name.match(/\.(xlsx|xls)$/i)) {
-      alert('Please upload an Excel file (.xlsx or .xls)');
+    if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      alert('Please upload an Excel or CSV file (.xlsx, .xls or .csv)');
       return;
     }
     setIsLoading(true);
@@ -110,13 +110,13 @@ export const FileUpload = ({ onDataLoaded, bankType }: FileUploadProps) => {
         <div className="flex flex-col items-center gap-1.5">
           <Upload className="w-6 h-6 text-slate-400" />
           <span className="text-xs text-slate-600 font-medium">Drop file or <span className="text-blue-600 underline">browse</span></span>
-          <span className="text-[10px] text-slate-400">.xlsx · .xls</span>
+          <span className="text-[10px] text-slate-400">.xlsx · .xls · .csv</span>
         </div>
       )}
       <input
         type="file"
         className="hidden"
-        accept=".xlsx,.xls"
+        accept=".xlsx,.xls,.csv"
         onChange={handleFileChange}
       />
     </label>
