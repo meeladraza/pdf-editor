@@ -34,7 +34,7 @@ export const parseBankAlHabibExcelFile = (file: File): Promise<TransactionRow[]>
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary", cellDates: true });
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
@@ -63,6 +63,25 @@ export const parseBankAlHabibExcelFile = (file: File): Promise<TransactionRow[]>
           const isOpening = details.toLowerCase().includes("opening balance");
           const isClosing = details.toLowerCase().includes("closing balance");
 
+          // Read balance directly from the worksheet cell (.v = raw numeric value).
+          // This bypasses any accounting-format string like "(4,183,470.14)" or "-4183470.14".
+          const balanceCellAddr = XLSX.utils.encode_cell({ r: i, c: 6 });
+          const balanceCell = worksheet[balanceCellAddr];
+let balance = "";
+          if (balanceCell?.v !== undefined && balanceCell.v !== "") {
+            if (typeof balanceCell.v === "number") {
+              balance = Math.abs(balanceCell.v).toLocaleString("en-US", {
+                minimumFractionDigits: 2, maximumFractionDigits: 2,
+              });
+            } else {
+              const cleaned = String(balanceCell.v).replace(/[(),$\s]/g, "").replace(/^-/, "");
+              const num = parseFloat(cleaned);
+              balance = isNaN(num)
+                ? String(balanceCell.v).trim()
+                : Math.abs(num).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+          }
+
           const transaction: TransactionRow = {
             date: formatDateDMY(row[0]),
             valueDate: row[1] ? formatDateDMY(row[1]) : "",
@@ -70,7 +89,7 @@ export const parseBankAlHabibExcelFile = (file: File): Promise<TransactionRow[]>
             particulars: details,
             debit: row[4] ? String(row[4]) : "",
             credit: row[5] ? String(row[5]) : "",
-            balance: row[6] ? String(row[6]) : "",
+            balance,
             isOpeningBalance: isOpening,
             isClosingBalance: isClosing,
           };
@@ -85,6 +104,6 @@ export const parseBankAlHabibExcelFile = (file: File): Promise<TransactionRow[]>
     };
 
     reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   });
 };

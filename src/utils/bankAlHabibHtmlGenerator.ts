@@ -210,6 +210,10 @@ const generateTableHeader = () => `
 const TD = `${FONT} font-size: 8pt; padding:24px 4px 4px 4px; color: #000;`;
 const TD_NUM = `${TD} text-align: right;`;
 
+// Strip leading minus or surrounding parentheses from balance (e.g. "(1,234.56)" → "1,234.56")
+const cleanBalance = (val: string): string =>
+  val ? val.trim().replace(/^-/, "").replace(/^\((.+)\)$/, "$1") : "";
+
 const generateRow = (tx: TransactionRow) => {
   const isBold = tx.isOpeningBalance || tx.isClosingBalance;
   const weight = isBold ? "font-weight: bold;" : "";
@@ -222,7 +226,7 @@ const generateRow = (tx: TransactionRow) => {
     <td style="${TD} ${weight}">${tx.particulars}</td>
     <td style="${TD_NUM} ${weight}">${tx.debit || ""}</td>
     <td style="${TD_NUM} ${weight}">${tx.credit || ""}</td>
-    <td style="${TD_NUM} ${weight}">${tx.balance}</td>
+    <td style="${TD_NUM} ${weight}">${cleanBalance(tx.balance)}</td>
   </tr>`;
 };
 
