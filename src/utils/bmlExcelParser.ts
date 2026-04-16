@@ -1,43 +1,43 @@
 import * as XLSX from "xlsx";
 import { TransactionRow } from "../types";
 
-// BML columns: Date | Value Date | Particulars | Instrument | Debit | Credit | Day-end Balance
+// BML columns: Date | Value Date | InstNo | Particulars | Debit | Credit | Balance
 
-const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
-const toDisplayDate = (d: number, m: number, y: number): string =>
-  `${String(d).padStart(2, "0")}-${MON[m]}-${y}`;
-
+// Format: "20 NOV 23"
 const formatDate = (val: any): string => {
   if (!val) return "";
-  const s = String(val).trim();
-  if (!s) return "";
+  let date: Date | null = null;
 
-  // Numeric Excel serial
-  if (typeof val === "number" && val > 25568) {
-    const date = new Date(new Date(1899, 11, 30).getTime() + val * 86400 * 1000);
-    if (!isNaN(date.getTime()))
-      return toDisplayDate(date.getDate(), date.getMonth(), date.getFullYear());
+  if (val instanceof Date) {
+    date = val;
+  } else if (typeof val === "number" && val > 25568) {
+    date = new Date(new Date(1899, 11, 30).getTime() + val * 86400 * 1000);
+  } else {
+    const s = String(val).trim();
+    if (!s) return "";
+
+    // DD/MM/YYYY
+    const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dmy) date = new Date(+dmy[3], +dmy[2] - 1, +dmy[1]);
+
+    // YYYY-MM-DD (ISO)
+    if (!date) {
+      const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (iso) date = new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    }
+
+    if (!date) date = new Date(s);
+    if (!date || isNaN(date.getTime())) return s;
   }
 
-  // Already DD-Mon-YYYY (e.g. "10-Apr-2025")
-  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) return s;
+  if (!date || isNaN(date.getTime())) return String(val);
 
-  // DD/MM/YYYY or D/M/YYYY
-  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (dmy) {
-    const m = parseInt(dmy[2]) - 1;
-    if (m >= 0 && m <= 11) return toDisplayDate(parseInt(dmy[1]), m, parseInt(dmy[3]));
-  }
-
-  // YYYY-MM-DD (ISO)
-  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (iso) {
-    const m = parseInt(iso[2]) - 1;
-    if (m >= 0 && m <= 11) return toDisplayDate(parseInt(iso[3]), m, parseInt(iso[1]));
-  }
-
-  return s;
+  const d   = date.getDate().toString().padStart(2, "0");
+  const mon = MONTHS[date.getMonth()];
+  const y   = date.getFullYear().toString().slice(-2);
+  return `${d} ${mon} ${y}`;
 };
 
 const cleanNumber = (val: any): string => {
@@ -53,7 +53,7 @@ export const parseBMLExcelFile = (file: File): Promise<TransactionRow[]> => {
     reader.onload = (e) => {
       try {
         const data     = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary", cellDates: false });
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
         const sheet    = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(sheet, {
           header: 1, raw: true, defval: "",
@@ -63,9 +63,9 @@ export const parseBMLExcelFile = (file: File): Promise<TransactionRow[]> => {
 
         for (let i = 0; i < jsonData.length; i++) {
           const row = jsonData[i];
-          if (!row[0] && !row[2] && !row[3] && !row[4] && !row[5]) continue;
+          if (!row[0] && !row[3]) continue;
 
-          const particulars = row[2] ? String(row[2]).trim() : "";
+          const particulars = row[3] ? String(row[3]).trim() : "";
           const partLower   = particulars.toLowerCase();
 
           // Skip header rows
@@ -80,12 +80,12 @@ export const parseBMLExcelFile = (file: File): Promise<TransactionRow[]> => {
 
           transactions.push({
             date:             formatDate(row[0]),
-            valueDate:        "",
+            valueDate:        formatDate(row[1]),
+            instNo:           row[2] ? String(row[2]).trim() : "",
             particulars,
-            instNo:           row[3] ? String(row[1]).trim() : "",
-            debit:            row[3] ? cleanNumber(row[3]) : "",
-            credit:           row[4] ? cleanNumber(row[4]) : "",
-            balance:          row[5] ? cleanNumber(row[5]) : "",
+            debit:            row[4] ? cleanNumber(row[4]) : "",
+            credit:           row[5] ? cleanNumber(row[5]) : "",
+            balance:          row[6] ? cleanNumber(row[6]) : "",
             isOpeningBalance: isOpening,
             isClosingBalance: isClosing,
           });
@@ -97,6 +97,6 @@ export const parseBMLExcelFile = (file: File): Promise<TransactionRow[]> => {
       }
     };
     reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   });
 };
