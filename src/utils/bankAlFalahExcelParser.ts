@@ -1,7 +1,10 @@
 import * as XLSX from "xlsx";
 import { TransactionRow } from "../types";
 
-const formatDateDMY = (dateValue: any): string => {
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+// Formats any date value as "20 NOV 23"
+const formatDDMMMYY = (dateValue: any): string => {
   if (!dateValue) return "";
   let date: Date;
 
@@ -22,9 +25,9 @@ const formatDateDMY = (dateValue: any): string => {
   if (isNaN(date.getTime())) return String(dateValue);
 
   const d = date.getDate().toString().padStart(2, "0");
-  const m = (date.getMonth() + 1).toString().padStart(2, "0");
-  const y = date.getFullYear();
-  return `${d}/${m}/${y}`;
+  const mon = MONTHS[date.getMonth()];
+  const y = date.getFullYear().toString().slice(-2);
+  return `${d} ${mon} ${y}`;
 };
 
 export const parseBankAlFalahExcelFile = (file: File): Promise<TransactionRow[]> => {
@@ -34,7 +37,7 @@ export const parseBankAlFalahExcelFile = (file: File): Promise<TransactionRow[]>
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary", cellDates: true });
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
@@ -66,10 +69,10 @@ export const parseBankAlFalahExcelFile = (file: File): Promise<TransactionRow[]>
           const isClosing = upper.includes("CLOSING BALANCE");
 
           const transaction: TransactionRow = {
-            date: row[0] ? formatDateDMY(row[0]) : "",
+            date: row[0] ? formatDDMMMYY(row[0]) : "",
             particulars: description,
             instNo: row[2] ? String(row[2]) : "",
-            valueDate: row[3] ? String(row[3]) : "",
+            valueDate: row[3] ? formatDDMMMYY(row[3]) : "",
             debit: row[4] ? String(row[4]) : "",
             credit: row[5] ? String(row[5]) : "",
             balance: row[6] ? String(row[6]) : "",
@@ -88,6 +91,6 @@ export const parseBankAlFalahExcelFile = (file: File): Promise<TransactionRow[]>
     };
 
     reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   });
 };
